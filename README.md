@@ -21,7 +21,8 @@ Then run `codex --list-skills` to confirm.
 
 | Skill | What it does |
 |---|---|
-| amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs |
+| amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs (review only, no image generation) |
+| amazon-listing-image-rebuild | Opens the listing, collects images and specs, reads the brand kit, writes a brief per slot, then generates each replacement image separately and composites the logo |
 
 ## Brand kits
 
