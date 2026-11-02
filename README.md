@@ -22,3 +22,14 @@ Then run `codex --list-skills` to confirm.
 | Skill | What it does |
 |---|---|
 | amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs |
+
+## Brand kits
+
+Short, agent-readable brand rules plus logo files. The image audit skill reads these automatically.
+
+| Brand | File | Status |
+|---|---|---|
+| Pyle | `brand-kits/pyle/BRAND.md` | Done (from May 2025 guidelines) |
+| SereneLife | | Needed |
+| NutriChef | | Needed |
+| Hurtle | | Needed |
