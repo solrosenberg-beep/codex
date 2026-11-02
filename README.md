@@ -42,3 +42,4 @@ Short, agent-readable brand rules plus logo files. The image audit skill reads t
 | SereneLife | `brand-kits/serenelife/BRAND.md` | Done |
 | NutriChef | `brand-kits/nutrichef/BRAND.md` | Done |
 | Hurtle | `brand-kits/hurtle/BRAND.md` | Done |
+| Squatz | `brand-kits/squatz/BRAND.md` | Done |
