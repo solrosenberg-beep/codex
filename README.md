@@ -30,7 +30,7 @@ Then restart Codex.
 | Skill | What it does |
 |---|---|
 | amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs (review only, no image generation) |
-| amazon-listing-image-rebuild | Opens the listing, collects images and specs, reads the brand kit, writes a brief per slot, then generates each replacement image separately and composites the logo |
+| amazon-listing-image-rebuild | Opens the listing, collects images and specs, reads the brand kit, writes a brief per slot, then generates each replacement image separately in the original slot order, composites the logo, and uploads the set to the Sound Around image drive as `<SKU>-CODEX` |
 
 ## Brand kits
 
@@ -43,3 +43,13 @@ Short, agent-readable brand rules plus logo files. The image audit skill reads t
 | NutriChef | `brand-kits/nutrichef/BRAND.md` | Done |
 | Hurtle | `brand-kits/hurtle/BRAND.md` | Done |
 | Squatz | `brand-kits/squatz/BRAND.md` | Done |
+
+## One-time setup for Drive upload (web Codex)
+
+The rebuild skill uploads finished images to the Sound Around image shared drive. It needs a Google service account:
+
+1. Google Cloud Console: create a service account, download its JSON key.
+2. In Google Drive, share the image shared drive with the service account email as Content manager.
+3. In web Codex: the `codex` project, Environment, Secrets: add `GDRIVE_SERVICE_ACCOUNT_JSON` with the full JSON text.
+
+Until that is done the skill still produces the images locally and tells you the upload was skipped.

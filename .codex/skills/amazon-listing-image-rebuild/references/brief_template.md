@@ -3,7 +3,7 @@
 ## Per-slot brief (fill one per image in briefs.md)
 
 ```
-### Slot <n>: <message in 5 words or fewer>
+### Slot <NN>: <message in 5 words or fewer>   (replaces current image <NN>, output file <SKU>-<NN>.png)
 - Source fact: <the line from facts.md this image is built on>
 - Headline (exact text, max 5 words):
 - Sub text (exact text, max 12 words):
