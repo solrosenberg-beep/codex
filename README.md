@@ -1,21 +1,29 @@
 # Codex skills
 
-Skills for OpenAI Codex (also work in Claude). One folder per skill under `skills/`.
+Skills for OpenAI Codex (also work in Claude). One folder per skill under `.codex/skills/`, which is where Codex looks for repo-level skills.
 
-## Install on a new machine
+## Web Codex (chatgpt.com/codex)
+
+Nothing to install. Connect this repo (`solrosenberg-beep/codex`) as the project in web Codex and the skills in `.codex/skills/` load automatically. Brand kits are read from `brand-kits/`.
+
+## Desktop Codex, Codex app, or CLI on a PC
 
 Windows (PowerShell):
 
     git clone https://github.com/solrosenberg-beep/codex $env:USERPROFILE\codex-skills
     New-Item -ItemType Directory -Force $env:USERPROFILE\.codex\skills | Out-Null
-    Copy-Item -Recurse -Force $env:USERPROFILE\codex-skills\skills\* $env:USERPROFILE\.codex\skills\
+    Copy-Item -Recurse -Force $env:USERPROFILE\codex-skills\.codex\skills\* $env:USERPROFILE\.codex\skills\
 
 Mac / Linux:
 
     git clone https://github.com/solrosenberg-beep/codex ~/codex-skills
-    mkdir -p ~/.codex/skills && cp -r ~/codex-skills/skills/* ~/.codex/skills/
+    mkdir -p ~/.codex/skills && cp -r ~/codex-skills/.codex/skills/* ~/.codex/skills/
 
-Then run `codex --list-skills` to confirm.
+No git? Ask Claude for the zip and run:
+
+    Expand-Archive -Force "$env:USERPROFILE\Downloads\codex-skills.zip" "$env:USERPROFILE\.codex\"
+
+Then restart Codex.
 
 ## Skills
 

@@ -23,7 +23,7 @@ Takes one ASIN from "current images" to "new image files on disk, one per slot, 
 ## Phase 2. Read the brand kit
 
 1. Identify the brand from the listing (Pyle, SereneLife, NutriChef, Hurtle, Pyle Pro, Pyle Vintage).
-2. Read `brand-kits/<brand>/BRAND.md` from this repo (relative to this skill: `../../brand-kits/<brand>/BRAND.md`). Note the hex codes, fonts, logo file path, trust stamp path, approved text/background pairs, photography rules, and the locked stack layout.
+2. Read `brand-kits/<brand>/BRAND.md` from this repo (relative to this skill: `../../../brand-kits/<brand>/BRAND.md`). Note the hex codes, fonts, logo file path, trust stamp path, approved text/background pairs, photography rules, and the locked stack layout.
 3. Load the logo file path (for Pyle: `brand-kits/pyle/assets/pyle-logo-red-transparent.png`). You will composite it onto generated images in Phase 4, not ask the image model to draw it. Image models misspell and warp logos.
 4. If there is no `BRAND.md` for the brand, stop and tell the user which brand kit is missing. Do not generate off-brand images and do not invent colors.
 
