@@ -41,4 +41,4 @@ Short, agent-readable brand rules plus logo files. The image audit skill reads t
 | Pyle | `brand-kits/pyle/BRAND.md` | Done (from May 2025 guidelines) |
 | SereneLife | `brand-kits/serenelife/BRAND.md` | Done |
 | NutriChef | | Needed |
-| Hurtle | | Needed |
+| Hurtle | `brand-kits/hurtle/BRAND.md` | Done |
