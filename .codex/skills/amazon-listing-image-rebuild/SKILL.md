@@ -19,7 +19,8 @@ Takes one ASIN from "current images" to "new image files on disk, one per slot, 
 3. Save every current listing image to `work/<ASIN>/current/01.jpg`, `02.jpg`, ... in the exact order they appear on the listing, left to right in the thumbnail strip. This numbering is the spine of the whole job: every new image you make replaces the current image with the same number, and the finished set is delivered in this same order. Note the hero's aspect ratio.
    Also record the Sound Around SKU (the model number, e.g. PKDRM8, SLSWNG100). It is usually in the title, the "Item model number" spec row, or the user gives it. You need it for the upload folder name.
 4. Open the search results for the main keyword (take it from the first three words of the title or ask the user). Save a screenshot as `work/<ASIN>/serp.png` and note in `listing.md`: 1-by or 5-by grid, what the top 6 competitors show on their hero, and what none of them show.
-5. Write the spec facts you will put on images into `work/<ASIN>/facts.md` as a short list. Only facts that appear on the listing or that the user confirms. A number that is not in `facts.md` does not go on an image. This is the guard against the 900 lb vs 700 lb problem.
+5. Write `work/<ASIN>/avatar.md`: who buys this (one specific person) and the pain that sent them searching. Check it against the Q&A and the 1 to 3 star reviews you collected. This person is the model in every lifestyle image and the pain is the subject of at least one before/after slot. See `../amazon-listing-image-audit/references/rules-session-2.md` sections 1 to 3.
+6. Write the spec facts you will put on images into `work/<ASIN>/facts.md` as a short list. Only facts that appear on the listing or that the user confirms. A number that is not in `facts.md` does not go on an image. This is the guard against the 900 lb vs 700 lb problem.
 
 ## Phase 2. Read the brand kit
 
@@ -30,7 +31,7 @@ Takes one ASIN from "current images" to "new image files on disk, one per slot, 
 
 ## Phase 3. Write one brief per slot
 
-Read `references/rules.md` in the sibling skill `amazon-listing-image-audit` for the full masterclass rules, then write `work/<ASIN>/briefs.md` using the per-slot template in `references/brief_template.md`. Rules that matter most here:
+Read `references/rules.md` and `references/rules-session-2.md` in the sibling skill `amazon-listing-image-audit` for the full masterclass rules, then write `work/<ASIN>/briefs.md` using the per-slot template in `references/brief_template.md`. Rules that matter most here:
 
 - One message per image. Count messages across the stack; no duplicates.
 - The hero carries the ONE value prop (capacity, weight limit, temperature range, modes, colors). If the product ships in a brown box, the box goes behind the product with the value prop and swatches printed on it. If multi-color, swatches on the hero.
@@ -40,7 +41,9 @@ Read `references/rules.md` in the sibling skill `amazon-listing-image-audit` for
 - Dimensions shown in place (under the cabinet, in the trunk), not on a blank background.
 - Realistic quantities and settings. Dishwasher parts on the top rack. Hand-wash parts in the sink. No whole chicken in a basket that cannot hold one.
 - Us vs them or before/after for any commoditized claim.
-- Pets: labs, goldens, dalmatians only. People: ordinary, American home settings, never plastic-looking.
+- Pets: labs, goldens, dalmatians only. People: ordinary, American home settings, never plastic-looking, and the same avatar body type in every lifestyle slot.
+- Every count that decides the purchase is on an image as a big number (bags, modes, feet of cable, colors, capacity). Rank them; the biggest goes on the hero.
+- Show the biggest realistic thing it fits. Show the outlet and the cord. Anchor adjustable ranges to an adult and a kid. Translate controls into outcomes. Save-money products get the math on the image. Secondary uses go last or get cut.
 - Keep the original order. Brief slot 1 replaces current image 1, slot 2 replaces current image 2, and so on, for every image the listing currently has. Do not add, drop, or shuffle slots on your own. If the current stack has 7 images you deliver 7, numbered the same way. The brand kit's "default stack layout" is a guide for what each slot should say when a listing is being built from scratch, not a license to reorder a live listing.
 - If you believe the order should change (a strong value prop buried at slot 7), write that under "Recommended reorder" in `README.md` and leave the files in the original order. The user decides, because reordering changes the thumbnail strip that is already indexed and split-tested.
 
@@ -55,7 +58,7 @@ For each slot, in order:
 1. Build the prompt from the brief using the pattern in `references/brief_template.md` (section "Prompt pattern"). Put the brand hex codes and font names in the prompt. Ask for the text to be rendered in the image only when the model is reliable at text; otherwise generate the scene with a clear empty panel where the text goes and add the text in step 3.
 2. Generate at 2000 x 2000 (or the largest square the tool allows). Save as `work/<ASIN>/new/<SKU>-<NN>.png` where NN is the two-digit slot number matching the current image it replaces (example: `PKDRM8-02.png`). The number comes first in sort order so the folder lists in listing order. Put the message in `README.md`, not the filename.
 3. Composite with a script, not by hand: paste the brand logo from the brand kit at the position the kit specifies, add or correct the text in the brand fonts and hex colors, add the trust stamp if the brief calls for it. Use Pillow or an equivalent. Keep the script in `work/<ASIN>/compose.py` so a rerun is one command.
-4. Check the result before moving on. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, nothing looks AI-fake (hands, faces, text artifacts, impossible food). If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
+4. Check the result before moving on. This is the QA gate: no image reaches a human until it passes. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, the avatar matches `avatar.md`, the outlet and scale are believable, nothing looks AI-fake (hands, faces, text artifacts, impossible food). Score each check pass/fail in `work/<ASIN>/qa.md`. If a TypeSafe (Jev) image classifier or similar scoring tool is available in the environment, run it on the image with those same checks and record its score too; it costs almost nothing. If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
 5. Hero only: also produce the Amazon-compliant version. Pure white background (RGB 255,255,255), product fills 85% or more of the frame, no logo overlay on the product itself, no text other than what is physically printed on the product or its box. Save as `<SKU>-01.png`. If you also made a post-edited variant with labels, save it as `<SKU>-01-labeled.png` and tell the user the labeled one is a split-test candidate with suppression risk, not a drop-in.
 
 ## Phase 5. Upload to the Sound Around image drive

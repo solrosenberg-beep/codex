@@ -2,6 +2,11 @@
 
 Buyer / ESM: [name]   Main keyword: [keyword]   SERP shape: [1-by or 5-by]   Date: [date]
 
+## Avatar and pain
+Who buys this: [one specific person]
+The pain that sent them searching: [one sentence]
+Do the current images speak to that person? [yes / no, and who they speak to instead]
+
 ## Bottom line
 [Two or three sentences. What the one value prop is, whether the hero shows it, and the single biggest reason this listing is losing clicks or sales.]
 

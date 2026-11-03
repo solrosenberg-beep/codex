@@ -32,6 +32,10 @@ Then restart Codex.
 | amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs (review only, no image generation) |
 | amazon-listing-image-rebuild | Opens the listing, collects images and specs, reads the brand kit, writes a brief per slot, then generates each replacement image separately in the original slot order, composites the logo, and uploads the set to the Sound Around image drive as `<SKU>-CODEX` |
 
+## Rulebook
+
+John Aspinall's rules live in `.codex/skills/amazon-listing-image-audit/references/`: `rules.md` (session 1, Oct 27 2026) and `rules-session-2.md` (session 2, Nov 2 2026). Both skills read both files. Add a new file per session; do not rewrite old ones.
+
 ## Brand kits
 
 Short, agent-readable brand rules plus logo files. The image audit skill reads these automatically.
