@@ -1,0 +1,435 @@
+<meta charset="utf-8">
+<title>Listing Image Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Poppins:wght@600;800&display=swap">
+<style>
+/* Layout: chat app. Left sidebar = history of products. Right = one thread + composer pinned to the bottom. */
+:root{
+  --bg:#FFFFFF; --side:#F7F7F6; --surface:#FFFFFF; --sunk:#F1F2F0; --line:#E2E3E0; --fg:#1C1E21; --muted:#62676D;
+  --accent:#1C1E21; --accent-fg:#FFFFFF; --link:#1F5FBF; --bubble:#F1F2F0;
+  --ok:#1E7A46; --ok-soft:#DFF1E6; --warn:#9A6200; --warn-soft:#FBEFD6; --bad:#B42318; --bad-soft:#FBE4E1; --sel:#2F6FEB;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1B1C1E; --side:#141517; --surface:#232427; --sunk:#2A2C2F; --line:#36383C; --fg:#ECEDEE; --muted:#9CA1A7;
+  --accent:#ECEDEE; --accent-fg:#141517; --link:#8DB4F5; --bubble:#2E3034;
+  --ok:#6FD39A; --ok-soft:#183626; --warn:#F2C062; --warn-soft:#3A2E14; --bad:#FF8A7E; --bad-soft:#3E1D1A; --sel:#7AA7FF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B1C1E; --side:#141517; --surface:#232427; --sunk:#2A2C2F; --line:#36383C; --fg:#ECEDEE; --muted:#9CA1A7;
+  --accent:#ECEDEE; --accent-fg:#141517; --link:#8DB4F5; --bubble:#2E3034;
+  --ok:#6FD39A; --ok-soft:#183626; --warn:#F2C062; --warn-soft:#3A2E14; --bad:#FF8A7E; --bad-soft:#3E1D1A; --sel:#7AA7FF; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sel);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-size:.9em}
+.muted{color:var(--muted)}
+.app{display:grid;grid-template-columns:270px 1fr;grid-template-rows:100%;height:100%;overflow:hidden}
+@media (max-width:820px){.app{grid-template-columns:1fr}.side{display:none}.side.open{display:flex;position:fixed;inset:0 30% 0 0;z-index:30;box-shadow:0 0 40px rgba(0,0,0,.3)}}
+
+/* sidebar */
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;padding:16px 12px;padding-left:max(12px,env(safe-area-inset-left,0px));overflow:auto}
+.brandrow{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.08rem;padding:4px 8px 12px}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:6px}
+.mark i{background:var(--accent-fg);border-radius:2px}.mark i:nth-child(4){opacity:.4}
+.sbtn{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;border:0;background:transparent;cursor:pointer;text-align:left;width:100%}
+.sbtn:hover{background:var(--sunk)}
+.sbtn svg{width:18px;height:18px;flex:none}
+.slabel{font-size:.8rem;color:var(--muted);font-weight:600;padding:14px 10px 4px}
+.hist{display:flex;flex-direction:column;gap:2px}
+.hitem{display:grid;grid-template-columns:10px 1fr;gap:4px 10px;align-items:center;padding:9px 10px;border-radius:10px;cursor:pointer;border:0;background:transparent;text-align:left;width:100%}
+.hitem:hover,.hitem[aria-current="true"]{background:var(--sunk)}
+.hitem b{font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hitem small{grid-column:2;color:var(--muted);font-size:.78rem}
+.sd{width:9px;height:9px;border-radius:50%}
+.sd.ok{background:var(--ok)}.sd.info{background:var(--sel)}.sd.warn{background:var(--warn)}.sd.bad{background:var(--bad)}
+.rules{margin-top:auto;font-size:.8rem;color:var(--muted);padding:10px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.rules i{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+
+/* main */
+.main{display:flex;flex-direction:column;height:100%;min-width:0;min-height:0;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.topbar h1{font-size:1.05rem;margin:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu{display:none;border:0;background:transparent;padding:6px;cursor:pointer}
+@media (max-width:820px){.menu{display:block}}
+.thread{flex:1;min-height:0;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.col{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.msg.user{align-self:flex-end;max-width:min(560px,90%);background:var(--bubble);padding:12px 16px;border-radius:18px 18px 4px 18px}
+.msg.bot{display:flex;flex-direction:column;gap:12px;min-width:0}
+.msg.bot p{margin:0;max-width:70ch}
+.msg.bot ul,.msg.bot ol{margin:0;padding-left:22px}
+.empty{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.empty h2{font-size:clamp(1.5rem,3vw,2rem);margin:0;font-weight:700;text-wrap:balance}
+.sugs{display:flex;flex-direction:column;gap:10px;width:100%;max-width:620px}
+.sug{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 16px;text-align:left;cursor:pointer}
+.sug:hover{background:var(--sunk)}
+.sug small{display:block;color:var(--muted)}
+
+.steps{list-style:none;margin:0;padding:12px 14px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--line);border-radius:14px;font-size:.93rem}
+.steps li{display:flex;gap:10px;align-items:center;color:var(--muted)}
+.steps li.done{color:var(--fg)}
+.st{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:.65rem;font-weight:700}
+.done .st{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.run .st{border-color:var(--sel);border-top-color:transparent;animation:spin 1s linear infinite}
+.fail .st{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+@media (max-width:600px){.strip{grid-template-columns:repeat(4,1fr)}}
+.strip div{aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#fff;position:relative;max-width:100%}
+.strip svg{width:100%;height:100%;display:block}
+.num{position:absolute;top:4px;left:4px;background:rgba(15,20,25,.75);color:#fff;font:500 .68rem var(--f-mono);padding:1px 6px;border-radius:5px}
+
+.fact{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.fact.answered{border-color:var(--ok);background:var(--ok-soft)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
+.opt[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.opt[disabled]{opacity:.5;cursor:default}
+.opt[disabled][aria-pressed="true"]{opacity:1}
+
+.bar{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);transition:width .4s}
+
+/* image set viewer */
+.dl{color:var(--link);font-weight:700;display:inline-flex;gap:8px;align-items:center;background:none;border:0;padding:0;cursor:pointer;font-size:1.02rem;align-self:flex-start}
+.dl svg{width:18px;height:18px}
+.viewer{display:grid;grid-template-columns:1fr 92px;gap:12px;align-items:start}
+.pair{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;min-width:0}
+.pane{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pane>span{font-size:.8rem;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.frame{aspect-ratio:1;max-width:100%;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line);position:relative}
+.frame svg{display:block;width:100%;height:100%}
+.frame.ok{outline:3px solid var(--ok);outline-offset:-3px}
+.thumbs{display:flex;flex-direction:column;gap:8px;max-height:560px;overflow-y:auto;padding:2px}
+.th{aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid var(--line);background:#fff;cursor:pointer;padding:0;position:relative;flex:none;width:84px}
+.th svg{display:block;width:100%;height:100%}
+.th[aria-current="true"]{border-color:var(--sel);box-shadow:0 0 0 2px var(--sel)}
+.th .tag{position:absolute;right:3px;bottom:3px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:.6rem;color:#fff;font-weight:700}
+.tag.ok{background:var(--ok)}.tag.bad{background:var(--bad)}.tag.gen{background:var(--sel)}
+@media (max-width:600px){.viewer{grid-template-columns:1fr}.thumbs{flex-direction:row;max-height:none;overflow-x:auto}.th{width:64px}.pair{grid-template-columns:1fr}}
+.gen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--sunk);color:var(--muted);font-weight:600;text-align:center;padding:12px}
+.spin{width:30px;height:30px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--sel);animation:spin 1s linear infinite}
+.failbox{position:absolute;inset:0;background:var(--bad-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px;text-align:center}
+.failbox b{color:var(--bad)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
+.btn svg{width:17px;height:17px}
+.btn.dark{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.good{border-color:var(--ok);color:var(--ok)}
+.btn.good[aria-pressed="true"]{background:var(--ok);color:var(--surface)}
+.btn[disabled]{opacity:.4;cursor:default}
+.slotinfo{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.slotinfo b{font-size:1.02rem}
+.pill{font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.info{background:var(--sunk);color:var(--muted)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.note{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:8px;font-size:.93rem}
+.note.err{border-color:var(--bad);background:var(--bad-soft)}
+.note.good{border-color:var(--ok);background:var(--ok-soft)}
+.files{list-style:none;margin:0;padding:0;font-size:.9rem;display:flex;flex-direction:column;gap:4px}
+.files li{display:flex;justify-content:space-between;gap:10px}
+
+/* composer */
+.composer{padding:10px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.box{max-width:880px;margin:0 auto;border:1px solid var(--line);border-radius:26px;background:var(--surface);box-shadow:0 4px 18px rgba(0,0,0,.06);padding:10px 10px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.box textarea{border:0;outline:0;resize:none;background:transparent;min-height:28px;max-height:160px;font-size:1.02rem;padding:6px 0}
+.boxrow{display:flex;align-items:center;gap:8px}
+.ibtn{width:38px;height:38px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer}
+.ibtn:hover{background:var(--sunk)}
+.ibtn svg{width:20px;height:20px}
+.send{margin-left:auto;width:40px;height:40px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;cursor:pointer}
+.send[disabled]{opacity:.3}
+.send svg{width:20px;height:20px}
+.chipsrow{display:flex;gap:6px;flex-wrap:wrap}
+.chipsrow:empty{display:none}
+.att{font-size:.8rem;background:var(--sunk);border-radius:999px;padding:3px 10px}
+.hint{max-width:880px;margin:6px auto 0;font-size:.78rem;color:var(--muted);text-align:center}
+.proto{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:calc(64px + env(safe-area-inset-top,0px));z-index:20;font-size:.8rem}
+.proto details{background:var(--surface);border:1px dashed var(--muted);border-radius:12px;padding:6px 12px;max-width:260px}
+.proto summary{cursor:pointer;font-weight:700;color:var(--muted)}
+.proto label{display:flex;gap:8px;align-items:center;margin-top:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side" id="side" aria-label="Products">
+    <div class="brandrow"><span class="mark"><i></i><i></i><i></i><i></i></span>Image Studio</div>
+    <button class="sbtn" id="newchat" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>New product</button>
+    <div class="slabel">History</div>
+    <div class="hist" id="hist"></div>
+    <div class="rules" title="Rules and brand kits are read from GitHub: solrosenberg-beep/codex"><i></i>Rules: codex · main · synced today</div>
+  </aside>
+  <section class="main">
+    <div class="topbar"><button class="menu" id="menu" type="button" aria-label="Show history"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 id="ttl">New product</h1></div>
+    <div class="thread" id="thread" aria-live="polite"><div class="col" id="col"></div></div>
+    <div class="composer">
+      <form class="box" id="form">
+        <div class="chipsrow" id="atts"></div>
+        <textarea id="inp" rows="1" placeholder="Paste an ASIN or Amazon link and say what you need"></textarea>
+        <div class="boxrow">
+          <button class="ibtn" type="button" id="plus" aria-label="Add product images"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <input type="file" id="file" accept="image/*" multiple hidden>
+          <span class="muted" style="font-size:.85rem">Add images (optional)</span>
+          <button class="send" id="send" type="submit" aria-label="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+        </div>
+      </form>
+      <p class="hint">Uses the image rules and brand kits from the codex repo. Check important numbers before you approve.</p>
+    </div>
+  </section>
+</div>
+<div class="proto"><details><summary>Prototype controls</summary>
+  <label><input type="checkbox" id="pc-slot" checked> One image fails first try</label>
+  <label><input type="checkbox" id="pc-drive"> Drive save fails</label>
+  <label><input type="checkbox" id="pc-link"> Amazon page won't load</label>
+</details></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+/* SereneLife kit values from codex brand-kits/serenelife/BRAND.md */
+const K={teal:"#018181",lake:"#66B2B2",mint:"#C7E2E2",sand:"#EAE8E5",ink:"#000000",font:"Poppins,Arial,sans-serif"};
+const $=(s,e=document)=>e.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const IC={
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>',
+  drive:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 3h8l6 10-4 7H6l-4-7z"/><path d="m8 3 6 10H2"/><path d="m16 3-6 10 4 7"/></svg>'
+};
+
+/* ---------- art: SVG stand-ins for listing images ---------- */
+const T=(x,y,s,sz,f,w=800,a="middle")=>`<text x="${x}" y="${y}" font-family="${K.font}" font-weight="${w}" font-size="${sz}" fill="${f}" text-anchor="${a}">${esc(s)}</text>`;
+const svg=(g,bg="#fff")=>`<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img"><rect width="400" height="400" fill="${bg}"/>${g}</svg>`;
+const logo=(x,y,w)=>`<image href="assets/serenelife.png" x="${x}" y="${y}" width="${w}" height="${w/4.3}"/>`;
+function mill(x,y,s,tilt=0,folded=false){
+  if(folded) return `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="62" rx="70" ry="7" fill="rgba(0,0,0,.15)"/><rect x="-22" y="-130" width="34" height="190" rx="8" fill="#1E1E1E"/><rect x="-18" y="-120" width="8" height="170" fill="#C8303A"/><rect x="10" y="-150" width="12" height="210" rx="5" fill="#2B2B2B"/><rect x="-6" y="-170" width="60" height="26" rx="6" fill="#2B2B2B"/><circle cx="-10" cy="58" r="7" fill="#444"/><circle cx="18" cy="58" r="7" fill="#444"/></g>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="10" cy="64" rx="170" ry="9" fill="rgba(0,0,0,.15)"/>
+  <g transform="rotate(${-tilt} 160 50)">
+   <rect x="-150" y="30" width="310" height="26" rx="10" fill="#1E1E1E"/><rect x="-140" y="22" width="292" height="12" rx="5" fill="#2E2E2E"/>
+   <path d="M-120 50H120" stroke="#C8303A" stroke-width="4" stroke-linecap="round"/>${T(20,49,"SereneLife",11,"#BBB",600)}
+   <rect x="-130" y="-120" width="16" height="152" rx="6" fill="#2B2B2B" transform="rotate(-14 -122 30)"/>
+   <rect x="-160" y="-150" width="92" height="34" rx="8" fill="#2B2B2B"/><rect x="-150" y="-144" width="60" height="18" rx="3" fill="#0E3B3B"/>
+   <text x="-120" y="-131" font-family="monospace" font-size="11" fill="#5FE0D6" text-anchor="middle">3.5 MPH</text>
+   <path d="M-80 -118 L-20 -96" stroke="#3A3A3A" stroke-width="9" stroke-linecap="round"/>
+  </g><rect x="-160" y="52" width="40" height="10" rx="4" fill="#333"/><rect x="128" y="52" width="40" height="10" rx="4" fill="#333"/></g>`;
+}
+function current(n){
+  const tiny=(x,y,s)=>T(x,y,s,7,"#777",600);
+  switch(n){
+    case 1:return svg(mill(215,250,.75));
+    case 2:return svg(mill(200,200,.6)+tiny(200,330,"Auto incline function with multiple levels for varied workouts"),"#F6F6F6");
+    case 3:return svg(mill(200,230,.75,0,true)+tiny(200,360,"Foldable design"));
+    case 4:return svg(mill(200,200,.6)+`<path d="M90 280H310M90 274v12M310 274v12" stroke="#999"/>`+tiny(200,298,"55.1 x 23.6 x 46.5 in"));
+    case 5:return svg(`<rect x="110" y="140" width="180" height="90" rx="10" fill="#2B2B2B"/><rect x="125" y="155" width="150" height="40" rx="4" fill="#0E3B3B"/>`+tiny(200,250,"LCD display: speed time distance calories pulse"),"#FAFAFA");
+    case 6:return svg(mill(200,210,.6)+tiny(200,320,"Max load see specifications"));
+    case 7:return svg(mill(160,240,.6)+`<circle cx="300" cy="120" r="70" fill="#FF5FA2"/><circle cx="300" cy="120" r="48" fill="#FFE34D"/>`+tiny(300,215,"Lifestyle"),"#FFF4FA");
+  }
+}
+function next(n,v=1){
+  const alt=v%2===0,P=alt?K.ink:K.teal,F=S.facts;
+  switch(n){
+    case 1:{let g=logo(18,18,140)+mill(178,290,.74,8);
+      g+=`<rect x="252" y="118" width="136" height="128" rx="18" fill="${P}"/>`+T(320,154,"15-LEVEL",22,"#fff",800)+T(320,182,"AUTO",22,"#fff",800)+T(320,210,"INCLINE",22,"#fff",800)+`<path d="M276 234 L360 222" stroke="${K.mint}" stroke-width="5" stroke-linecap="round"/><path d="M346 214 L362 222 L350 236" stroke="${K.mint}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+      if(S.heroNote) g+=`<rect x="252" y="252" width="136" height="26" rx="13" fill="${K.mint}"/>`+T(320,270,"ONE-TOUCH CLIMB",11,K.teal,800);
+      return svg(g);}
+    case 2:{let g=`<rect width="400" height="140" fill="${P}"/>`+T(84,118,"15",104,K.mint,800)+T(262,74,"INCLINE",36,"#fff",800)+T(262,108,"LEVELS",36,"#fff",800);
+      for(let i=0;i<15;i++){const h=10+i*9;g+=`<rect x="${28+i*23}" y="${360-h}" width="17" height="${h}" rx="4" fill="${i>11?K.teal:K.lake}"/>`}
+      g+=T(200,388,F.incline&&F.incline!=="Leave both off"?"UP TO "+F.incline+" INCLINE":"ONE TOUCH. HILLS ON DEMAND.",16,K.teal,800);
+      return svg(g,K.sand);}
+    case 3:{let g=T(200,60,"FOLDS UP.",36,K.teal,800)+T(200,102,"ROLLS AWAY.",36,K.teal,800)+mill(120,282,.62)+`<path d="M210 260h40" stroke="${K.teal}" stroke-width="6" stroke-linecap="round"/><path d="M240 248l14 12-14 12" stroke="${K.teal}" stroke-width="6" fill="none" stroke-linecap="round"/>`+mill(318,272,.75,0,true)+logo(270,370,110);
+      return svg(g,alt?"#fff":K.mint);}
+    case 4:{let g=`<rect width="400" height="400" fill="#F4F1EB"/><rect x="0" y="300" width="400" height="100" fill="#D9CFC0"/><rect x="230" y="200" width="160" height="80" rx="16" fill="#9BB1B0"/><rect x="236" y="170" width="148" height="44" rx="14" fill="#B4C7C6"/>`+mill(110,262,.62,0,true);
+      g+=`<rect width="400" height="96" fill="${P}"/>`+T(200,44,"FITS NEXT TO",28,"#fff",800)+T(200,80,"YOUR COUCH",28,"#fff",800)+T(110,368,"FOLDED",16,K.teal,800);
+      return svg(g);}
+    case 5:{let g=`<rect width="400" height="96" fill="${P}"/>`+T(200,60,"SEE EVERY STEP",30,"#fff",800)+`<rect x="40" y="130" width="320" height="170" rx="18" fill="#2B2B2B"/><rect x="60" y="150" width="280" height="130" rx="8" fill="#0E3B3B"/>`;
+      [["3.5","MPH"],["24:10","TIME"],["1.4","MILES"],["210","CAL"]].forEach(([a,b],i)=>{const x=95+(i%2)*140,y=200+Math.floor(i/2)*60;g+=`<text x="${x+30}" y="${y}" font-family="monospace" font-size="28" fill="#5FE0D6" text-anchor="middle">${a}</text>`+T(x+30,y+18,b,11,K.mint,700)});
+      g+=T(200,350,"Speed, time, distance, calories",18,K.ink,600)+logo(270,368,110);
+      return svg(g,K.sand);}
+    case 6:{const w=F.weight==="Yes, 265 lb"?"HOLDS UP TO 265 LB":"BUILT STEADY";let g=`<rect width="400" height="96" fill="${P}"/>`+T(200,60,w,26,"#fff",800)+mill(200,270,.95)+`<rect x="80" y="330" width="240" height="40" rx="20" fill="${K.mint}"/>`+T(200,356,"Steel frame · wide belt",15,K.teal,800);
+      return svg(g);}
+    case 7:{let g=`<rect width="400" height="400" fill="#EEF3F2"/><rect x="0" y="290" width="400" height="110" fill="#CFC6B6"/><rect x="250" y="120" width="110" height="80" rx="6" fill="#fff" stroke="#ccc"/><rect x="262" y="132" width="86" height="56" fill="#BFD7D6"/>`+mill(170,282,.72,4)+`<rect width="400" height="96" fill="${P}"/>`+T(200,44,"WALK WHILE",28,"#fff",800)+T(200,80,"YOU WATCH",28,"#fff",800)+logo(270,368,110);
+      return svg(g);}
+  }
+}
+const ROLES=["Hero","Incline","Folds away","Fits your space","Display","Sturdy","Everyday use"];
+const MSGS=["15-LEVEL AUTO INCLINE","15 INCLINE LEVELS","FOLDS UP. ROLLS AWAY.","FITS NEXT TO YOUR COUCH","SEE EVERY STEP","STEADY STEEL FRAME","WALK WHILE YOU WATCH"];
+
+/* ---------- state ---------- */
+const HIST=[
+  {name:"SLSWNG100 · Saucer Swing",by:"Maya R.",st:["ok","Saved to Drive"]},
+  {name:"PKPZM430 · Pizza Maker",by:"Josh T.",st:["info","In review"]},
+  {name:"SLTWB20 · Towel Warmer",by:"Dana K.",st:["ok","Audit done"]},
+  {name:"HUPOGO40 · Pogo Stick",by:"Eli S.",st:["warn","Needs facts"]},
+  {name:"PDBL39 · Ball Launcher",by:"Maya R.",st:["bad","Drive save failed"]}
+];
+let S,cur=1;
+function reset(){S={asin:null,sku:null,mode:null,heroNote:"",facts:{},slots:Array.from({length:7},(_,i)=>({n:i+1,st:"idle",v:0,tries:0,note:""})),drive:"idle",uploads:[]};cur=1;}
+reset();
+
+/* ---------- thread helpers ---------- */
+const col=$("#col"),thread=$("#thread");
+function scroll(){thread.scrollTop=thread.scrollHeight}
+function user(t){const d=document.createElement("div");d.className="msg user";d.textContent=t;col.appendChild(d);scroll()}
+function bot(html){const d=document.createElement("div");d.className="msg bot";d.innerHTML=html;col.appendChild(d);scroll();return d}
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
+
+function emptyState(){
+  col.innerHTML=`<div class="empty"><h2>What are we fixing today?</h2>
+   <div class="sugs">
+    <button class="sug" type="button" data-s="B0HJ3R1ZQD rebuild this it has an Auto incline so main image needs to be amazing">B0HJ3R1ZQD rebuild this it has an Auto incline so main image needs to be amazing<small>Rebuild every image, hero first</small></button>
+    <button class="sug" type="button" data-s="Audit B0HJ3R1ZQD">Audit B0HJ3R1ZQD<small>Grade the images and get fix briefs, no new images</small></button>
+   </div></div>`;
+  col.querySelectorAll(".sug").forEach(b=>b.onclick=()=>{inp.value=b.dataset.s;sync();inp.focus()});
+}
+function liveSt(){
+  if(S.drive==="done")return["ok","Saved to Drive"];if(S.drive==="error")return["bad","Drive save failed"];
+  if(S.mode==="audit")return["ok","Audit done"];
+  if(!S.slots.some(s=>s.v))return["warn","Needs facts"];
+  return["info",`In review · ${S.slots.filter(s=>s.st==="approved").length} of 7 approved`];
+}
+function drawHist(){
+  const mine=S.asin?[{name:`${S.sku} · Treadmill`,by:"You",st:liveSt(),me:true}]:[];
+  $("#hist").innerHTML=[...mine,...HIST].map(h=>`<button class="hitem" type="button" ${h.me?'aria-current="true"':""}><span class="sd ${h.st[0]}"></span><b>${esc(h.name)}</b><small>${esc(h.by)} · ${h.st[1]}</small></button>`).join("");
+  $("#hist").querySelectorAll(".hitem").forEach((b,i)=>b.onclick=()=>{if(!(mine.length&&i===0))toast("In the live app this opens that product's chat.")});
+}
+
+/* ---------- conversation ---------- */
+const ASIN=/\bB0[A-Z0-9]{8}\b/i;
+async function handle(text){
+  const m=text.match(/\/dp\/([A-Z0-9]{10})/i), asin=m?m[1]:(text.match(ASIN)||[])[0];
+  if(asin) return startJob(asin.toUpperCase(),text);
+  user(text);
+  if(!S.asin){bot(`<p>Paste an ASIN (like <span class="mono">B0HJ3R1ZQD</span>) or an Amazon link, and say <b>rebuild</b> or <b>audit</b>.</p>`);return}
+  const t=text.toLowerCase();
+  if(/approve all/.test(t)){S.slots.forEach(s=>{if(s.st==="ready")s.st="approved"});drawSet();drawHist();bot(`<p>Approved every ready image.</p>`);return}
+  if(/drive|save/.test(t))return saveDrive();
+  if(/download|zip/.test(t)){toast(`Prototype: the live app downloads ${S.sku}-CODEX.zip`);bot(`<p>Downloading the approved images as <span class="mono">${S.sku}-CODEX.zip</span>.</p>`);return}
+  if(!S.slots.some(s=>s.v)){bot(`<p>Answer the questions above first, then I'll generate.</p>`);return}
+  const sm=t.match(/(?:slot|image|#)\s*(\d+)/), slot=/hero|main/.test(t)?1:sm?+sm[1]:cur;
+  if(slot<1||slot>7){bot(`<p>This listing has 7 images. Which one? Say “slot 3” or “the hero”.</p>`);return}
+  S.slots[slot-1].note=text; if(slot===1)S.heroNote=text;
+  bot(`<p>On it. Regenerating <b>slot ${slot}</b> with your note.</p>`);
+  await gen(slot); bot(`<p>Slot ${slot} is updated (v${S.slots[slot-1].v}). It's showing in the viewer above.</p>`);
+}
+async function startJob(asin,text){
+  reset(); col.innerHTML=""; user(text);
+  S.asin=asin; S.sku="SLTRD15"; S.mode=/audit|grade/i.test(text)&&!/rebuild/i.test(text)?"audit":"rebuild";
+  const note=text.replace(ASIN,"").replace(/https?:\S+/,"").trim();
+  $("#ttl").textContent=`${S.sku} · ${asin}`; drawHist();
+  const steps=[`Opening amazon.com/dp/${asin}`,"Collecting 7 images in listing order","Reading title, bullets, specs, Q&A and reviews","Brand: SereneLife · SKU SLTRD15 (from “Item model number”)","Loading SereneLife brand kit and image rules from codex",...(/incline/i.test(note)?["Noted: auto incline goes front and center on the hero"]:[])];
+  const box=bot(`<ul class="steps">${steps.map(s=>`<li><span class="st"></span>${esc(s)}</li>`).join("")}</ul>`);
+  const lis=[...box.querySelectorAll("li")];
+  for(let i=0;i<lis.length;i++){lis[i].className="run";await wait(480);
+    if(i===1&&$("#pc-link").checked){lis[i].className="fail";lis[i].querySelector(".st").textContent="!";
+      const e=bot(`<div class="note err"><b>Amazon didn't return the images.</b> The page may be blocked or the ASIN may be wrong. Try again, or add the images with the + button and send the ASIN again.</div><div class="acts"><button class="btn dark" type="button">${IC.redo} Try again</button></div>`);
+      e.querySelector("button").onclick=()=>{$("#pc-link").checked=false;startJob(asin,text)};return}
+    lis[i].className="done";lis[i].querySelector(".st").textContent="✓"}
+  bot(`<p><b>Here's what's holding the listing back:</b></p>
+   <div class="strip">${[1,2,3,4,5,6,7].map(n=>`<div>${current(n)}<span class="num">${String(n).padStart(2,"0")}</span></div>`).join("")}</div>
+   <ol><li><b>The hero doesn't show the auto incline.</b> It's the reason to buy this treadmill and it's invisible on slot 1.</li>
+   <li><b>Text on slots 2, 4, 5 and 6 can't be read on a phone.</b></li>
+   <li><b>Slot 7 looks fake</b> and says nothing. It becomes a real use case.</li>
+   <li><b>The incline claims conflict:</b> 23.5% in one bullet, 7.8° in another.</li></ol>`);
+  if(S.mode==="audit") return auditReport();
+  askFacts();
+}
+function askFacts(){
+  const Q=[{id:"incline",q:"The listing says 23.5% incline in one place and 7.8° in another. Which goes on the images?",o:["23.5%","7.8°","Leave both off"]},
+           {id:"weight",q:"Max user weight shows as 265 lb. Is that right?",o:["Yes, 265 lb","Not sure, leave it off"]}];
+  const d=bot(`<p>Two quick checks before I generate. A number that isn't confirmed doesn't go on an image.</p>${Q.map(q=>`<div class="fact" data-f="${q.id}"><span>${q.q}</span><div class="opts">${q.o.map(o=>`<button class="opt" type="button" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}`);
+  d.querySelectorAll(".fact").forEach(f=>f.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(b.disabled)return;
+    S.facts[f.dataset.f]=b.dataset.v;f.classList.add("answered");f.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    if(Object.keys(S.facts).length===2){d.querySelectorAll(".opt").forEach(x=>x.disabled=true);generateAll()}
+  }));
+}
+async function generateAll(){
+  bot(`<p id="gtxt">Generating 7 images, one at a time, in listing order…</p><div class="bar"><i id="gbar" style="width:0"></i></div>`);
+  bot(`<button class="dl" type="button" id="dlset">${IC.down} Download the image set</button><div id="set"></div>`);
+  $("#dlset").onclick=()=>toast(`Prototype: the live app downloads ${S.sku}-CODEX.zip (approved images only).`);
+  S.slots.forEach(s=>s.st="queued");drawSet();
+  for(let n=1;n<=7;n++){$("#gtxt").textContent=`Generating ${n} of 7…`;await gen(n,false);$("#gbar").style.width=(n/7*100)+"%"}
+  const f=S.slots.filter(s=>s.st==="failed").length;
+  $("#gtxt").innerHTML=f?`Done. 6 of 7 ready. <b style="color:var(--bad)">Slot 4 didn't generate.</b> Tap it and press Try again.`:"Done. All 7 ready.";
+  bot(`<p>The hero with the incline badge is a split-test version. I also saved an <b>Amazon-safe hero</b> (white background, no overlay) as <span class="mono">${S.sku}-01.png</span>. ${S.facts.incline==="Leave both off"?"I left the incline % and angle off because the listing conflicts. The 15 levels are highlighted instead.":""}</p>
+   <p>Approve what you like, or just type a change, like <i>“make the hero badge bigger”</i> or <i>“redo slot 4 with a bedroom”</i>. When you're done, say <b>save to drive</b>.</p>`);
+  drawHist();
+}
+async function gen(n,focus=true){
+  const s=S.slots[n-1];s.st="gen";if(focus)cur=n;drawSet();await wait(focus?1100:650);
+  s.tries++;if(n===4&&s.tries===1&&$("#pc-slot").checked){s.st="failed"}else{s.st="ready";s.v++}
+  drawSet();drawHist();
+}
+function drawSet(){
+  const el=$("#set");if(!el)return;const s=S.slots[cur-1];
+  const right=s.st==="gen"?`<div class="gen"><div class="spin"></div>Generating slot ${cur}…<small>Then adding the logo and checking it reads on a phone</small></div>`
+    :s.st==="failed"?`<div class="failbox"><b>Slot ${cur} didn't generate</b><span>The image service timed out. The other images are fine.</span><button class="btn dark" type="button" id="retry">${IC.redo} Try again</button></div>`
+    :s.v?next(cur,s.v):`<div class="gen">Waiting in line</div>`;
+  const pill=s.st==="approved"?["ok","Approved"]:s.st==="failed"?["bad","Failed"]:s.st==="gen"?["info","Generating"]:s.v?["info","Ready"]:["info","Queued"];
+  const ok=s.st==="ready"||s.st==="approved", a=S.slots.filter(x=>x.st==="approved").length;
+  el.innerHTML=`<div class="viewer"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+     <div class="slotinfo"><b>Slot ${cur} · ${ROLES[cur-1]}</b><span class="muted">${MSGS[cur-1]}</span><span class="pill ${pill[0]}">${pill[1]}</span></div>
+     <div class="pair"><div class="pane"><span>Original</span><div class="frame">${current(cur)}</div></div>
+      <div class="pane"><span><span>New</span>${s.v?`<span class="mono">${S.sku}-${String(cur).padStart(2,"0")}.png · v${s.v}</span>`:""}</span><div class="frame ${s.st==="approved"?"ok":""}">${right}</div></div></div>
+     ${s.note?`<span class="muted" style="font-size:.88rem">Your note: “${esc(s.note)}”</span>`:""}
+     <div class="acts">
+      <button class="btn good" type="button" id="ap" aria-pressed="${s.st==="approved"}" ${ok?"":"disabled"}>${IC.check} ${s.st==="approved"?"Approved":"Approve"}</button>
+      <button class="btn" type="button" id="rc" ${ok?"":"disabled"}>${IC.edit} Request Changes</button>
+      <button class="btn" type="button" id="rg" ${ok?"":"disabled"}>${IC.redo} Regenerate</button>
+     </div>
+     <div class="acts" style="border-top:1px solid var(--line);padding-top:12px;align-items:center">
+      <span class="muted">${a} of 7 approved</span>
+      <button class="btn" type="button" id="apall" ${S.slots.some(x=>x.st==="ready")?"":"disabled"}>Approve all ready</button>
+      <button class="btn dark" type="button" id="drv" ${a?"":"disabled"}>${IC.drive} Save to Drive</button>
+     </div></div>
+    <div class="thumbs" role="list" aria-label="Images in listing order">${S.slots.map(x=>`<button class="th" type="button" role="listitem" data-n="${x.n}" aria-current="${x.n===cur}" aria-label="Slot ${x.n}">${x.v?next(x.n,x.v):current(x.n)}<span class="num">${String(x.n).padStart(2,"0")}</span>${x.st==="approved"?'<span class="tag ok">✓</span>':x.st==="failed"?'<span class="tag bad">!</span>':x.st==="gen"?'<span class="tag gen">…</span>':""}</button>`).join("")}</div></div>`;
+  el.querySelectorAll(".th").forEach(b=>b.onclick=()=>{cur=+b.dataset.n;drawSet()});
+  $("#ap").onclick=()=>{s.st=s.st==="approved"?"ready":"approved";drawSet();drawHist()};
+  $("#rg").onclick=()=>gen(cur);
+  $("#retry")&&($("#retry").onclick=()=>gen(cur));
+  $("#rc").onclick=()=>{inp.value=`Slot ${cur}: `;sync();inp.focus();toast("Type what to change, then press send.")};
+  $("#apall").onclick=()=>{S.slots.forEach(x=>{if(x.st==="ready")x.st="approved"});drawSet();drawHist()};
+  $("#drv").onclick=saveDrive;
+}
+async function saveDrive(){
+  const ap=S.slots.filter(s=>s.st==="approved");
+  if(!ap.length){bot(`<p>Nothing is approved yet. Approve at least one image, then save.</p>`);return}
+  const folder=`${S.sku}-CODEX`,files=ap.map(s=>`${S.sku}-${String(s.n).padStart(2,"0")}.png`);
+  const d=bot(`<p>Saving ${files.length} approved image${files.length>1?"s":""} to Google Drive › Sound Around images › <b class="mono">${folder}</b></p><ul class="files">${files.map(f=>`<li><span class="mono">${f}</span><span class="pill info">Waiting</span></li>`).join("")}</ul>`);
+  const pills=[...d.querySelectorAll(".pill")];S.drive="saving";
+  for(let i=0;i<files.length;i++){pills[i].textContent="Uploading…";await wait(320);
+    if($("#pc-drive").checked&&i===1){pills[i].className="pill bad";pills[i].textContent="Failed";S.drive="error";$("#pc-drive").checked=false;drawHist();
+      const e=bot(`<div class="note err"><b>Couldn't save to Google Drive.</b> 1 of ${files.length} uploaded, then the app lost access to the image drive. Ask IT to share the drive with the app's service account, then try again. Your approved images are kept here.</div><div class="acts"><button class="btn dark" type="button">${IC.redo} Try again</button></div>`);
+      e.querySelector("button").onclick=saveDrive;return}
+    pills[i].className="pill ok";pills[i].textContent="Saved"}
+  S.drive="done";drawHist();
+  bot(`<div class="note good"><b>Saved ${files.length} images to ${folder}.</b> The folder link shows here in the live app and in History.</div>${ap.length<7?`<p class="muted">${7-ap.length} image(s) weren't approved, so they weren't saved.</p>`:""}`);
+}
+function auditReport(){
+  const why=["Badge in Teal with white text. Product fills the frame, slight incline.","Big 15 in Mint on Teal with a 15-step ramp.","Show it folding and rolling away, side by side.","Folded, next to a couch in a small living room.","Large display numbers people can read.","Steel frame, wide belt. Max weight only if confirmed.","Real person walking while watching TV. Not AI-looking."];
+  const d=bot(`<p><b>Fix briefs, in listing order.</b> Press Rebuild any time to turn these into images.</p>
+   <ol>${MSGS.map((m,i)=>`<li><b>Slot ${i+1} · ${ROLES[i]}:</b> ${m}. ${why[i]}</li>`).join("")}</ol>
+   <div class="acts"><button class="btn" type="button" data-a="dl">${IC.down} Download report</button><button class="btn dark" type="button" data-a="rb">Rebuild these images</button></div>`);
+  d.querySelector('[data-a=dl]').onclick=()=>toast(`Prototype: downloads ${S.sku}-audit.docx`);
+  d.querySelector('[data-a=rb]').onclick=e=>{e.target.disabled=true;S.mode="rebuild";user("Rebuild these images");askFacts()};
+  drawHist();
+}
+
+/* ---------- composer ---------- */
+const inp=$("#inp"),send=$("#send");
+function sync(){send.disabled=!inp.value.trim();inp.style.height="auto";inp.style.height=Math.min(inp.scrollHeight,160)+"px"}
+inp.addEventListener("input",sync);
+inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#form").requestSubmit()}});
+$("#form").addEventListener("submit",e=>{e.preventDefault();const t=inp.value.trim();if(!t)return;inp.value="";sync();
+  if(col.querySelector(".empty"))col.innerHTML="";handle(t)});
+$("#plus").onclick=()=>$("#file").click();
+$("#file").onchange=()=>{[...$("#file").files].forEach(f=>S.uploads.push(f.name));$("#atts").innerHTML=S.uploads.map(n=>`<span class="att">${esc(n)}</span>`).join("")};
+$("#newchat").onclick=()=>{reset();$("#ttl").textContent="New product";emptyState();drawHist();$("#side").classList.remove("open")};
+$("#menu").onclick=()=>$("#side").classList.toggle("open");
+emptyState();drawHist();
+</script>
