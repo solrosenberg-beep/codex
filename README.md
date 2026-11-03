@@ -36,6 +36,10 @@ Then restart Codex.
 
 John Aspinall's rules live in `.codex/skills/amazon-listing-image-audit/references/`: `rules.md` (session 1, Oct 27 2026) and `rules-session-2.md` (session 2, Nov 2 2026). Both skills read both files. Add a new file per session; do not rewrite old ones.
 
+## Image Studio (web app)
+
+A chat page that runs the rebuild skill for the team: paste an ASIN and say what you need, get the new images in listing order, approve, save to Drive. Setup: `image-studio/README.md`.
+
 ## Brand kits
 
 Short, agent-readable brand rules plus logo files. The image audit skill reads these automatically.

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Studio</title>
+<style>
+:root{--bg:#fff;--fg:#1c1e21;--muted:#666b70;--line:#e3e3e0;--soft:#f3f3f1;--link:#1f5fbf;--ok:#1e7a46;--bad:#b42318;--sel:#2f6feb}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1c1e;--fg:#ececec;--muted:#9ca1a7;--line:#36383c;--soft:#2a2c2f;--link:#8db4f5;--ok:#6fd39a;--bad:#ff8a7e;--sel:#7aa7ff}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}
+button,input,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line)}
+header b{font-size:1.05rem}
+header a,header button.link{color:var(--muted);text-decoration:none;background:none;border:0;cursor:pointer;padding:0}
+header .r{margin-left:auto;font-size:.8rem;color:var(--muted)}
+#warn{background:#fbefd6;color:#6b4500;padding:8px 20px;font-size:.9rem}
+#thread{flex:1;overflow-y:auto;padding:24px 16px}
+.col{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.u{align-self:flex-end;background:var(--soft);padding:10px 16px;border-radius:18px 18px 4px 18px;max-width:85%;white-space:pre-wrap}
+.a p{margin:0 0 8px}.a ul{margin:0 0 8px;padding-left:22px}.a a{color:var(--link)}
+.steps{list-style:none;margin:0;padding:0;font-size:.93rem;display:flex;flex-direction:column;gap:5px}
+.steps li::before{display:inline-block;width:20px;font-weight:700}
+.steps .done::before{content:"✓";color:var(--ok)}.steps .fail::before{content:"✕";color:var(--bad)}.steps .run::before{content:"…";color:var(--sel)}
+.dl{color:var(--link);font-weight:600;text-decoration:none;display:inline-block;margin-bottom:10px}
+.gal{display:grid;grid-template-columns:1fr 88px;gap:12px}
+.pair{display:grid;grid-template-columns:1fr 1.7fr;gap:10px}
+.pair div span{font-size:.8rem;color:var(--muted)}
+.pair img,.ph{width:100%;aspect-ratio:1;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff;display:block}
+.ph{display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--soft);text-align:center;padding:10px}
+.thumbs{display:flex;flex-direction:column;gap:8px;max-height:620px;overflow-y:auto}
+.thumbs button{padding:0;border:2px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;position:relative;width:84px;height:84px;flex:none}
+.thumbs button.on{border-color:var(--sel)}
+.thumbs img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+.thumbs i{position:absolute;right:3px;bottom:3px;font-style:normal;font-size:.7rem;font-weight:700;color:#fff;border-radius:9px;padding:0 5px}
+.ok{background:var(--ok)}.bad{background:var(--bad)}.gen{background:var(--sel)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btns button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btns button.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btns button:disabled{opacity:.4;cursor:default}
+.err{color:var(--bad);font-size:.9rem}
+@media (max-width:640px){.gal{grid-template-columns:1fr}.thumbs{flex-direction:row;overflow-x:auto}.pair{grid-template-columns:1fr}}
+footer{padding:8px 16px 16px}
+form{max-width:860px;margin:0 auto;border:1px solid var(--line);border-radius:24px;padding:8px 8px 8px 14px;display:flex;align-items:flex-end;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+textarea{flex:1;border:0;outline:0;resize:none;background:transparent;padding:8px 0;max-height:160px}
+.ib{width:38px;height:38px;border-radius:50%;border:0;background:transparent;cursor:pointer;font-size:1.4rem;line-height:1}
+.send{background:var(--fg);color:var(--bg);font-size:1.1rem}
+.send:disabled{opacity:.3}
+#files{max-width:860px;margin:0 auto 6px;font-size:.82rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}td,th{text-align:left;padding:8px;border-bottom:1px solid var(--line)}tr[data-id]{cursor:pointer}
+</style>
+</head>
+<body>
+<header><b>Image Studio</b><a href="#" id="new">New</a><button class="link" id="hist">History</button><span class="r" id="rules"></span></header>
+<div id="warn" hidden></div>
+<div id="thread"><div class="col" id="col"></div></div>
+<footer>
+  <div id="files"></div>
+  <form id="f">
+    <button type="button" class="ib" id="plus" title="Attach product images">+</button>
+    <input type="file" id="pick" accept="image/*" multiple hidden>
+    <textarea id="t" rows="1" placeholder="Paste an ASIN or Amazon link and say what you need"></textarea>
+    <button class="ib send" id="go" disabled title="Send">↑</button>
+  </form>
+</footer>
+<script>
+const $=s=>document.querySelector(s), col=$("#col"), th=$("#thread");
+let JOB=null, data=null, sel=1, timer=null, files=[];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function md(s){ // tiny markdown: **bold**, *italic*, [text](url), "- " bullets, blank-line paragraphs
+  const inl=x=>esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>").replace(/\[(.+?)\]\((\S+?)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  let out="",list=false;
+  for(const line of String(s).split("\n")){
+    if(/^- /.test(line)){if(!list){out+="<ul>";list=true}out+="<li>"+inl(line.slice(2))+"</li>";continue}
+    if(list){out+="</ul>";list=false}
+    if(line.trim())out+="<p>"+inl(line)+"</p>";
+  }
+  return out+(list?"</ul>":"");
+}
+let me=""; try{me=localStorage.getItem("studio-name")||""}catch(e){}
+function user(){ if(!me){me=(prompt("Your name (for History)")||"").trim(); try{localStorage.setItem("studio-name",me)}catch(e){}} return me }
+
+function empty(){
+  col.innerHTML=`<div style="text-align:center;margin-top:18vh"><h2 style="font-weight:600">What are we fixing today?</h2><p style="color:var(--muted)">Example: <i>B0HJ3R1ZQD rebuild this, it has an auto incline so the main image needs to be amazing</i></p></div>`;
+}
+function render(){
+  if(!data){empty();return}
+  const atBottom=th.scrollHeight-th.scrollTop-th.clientHeight<80;
+  col.innerHTML=data.messages.map(m=>{
+    if(m.role==="user")return `<div class="u">${esc(m.text)}${m.files?`\n📎 ${m.files} image(s)`:""}</div>`;
+    if(m.type==="steps")return `<div class="a"><ul class="steps">${m.items.map(i=>`<li class="${i.state}">${esc(i.label)}</li>`).join("")}</ul></div>`;
+    if(m.type==="gallery")return `<div class="a" id="gallery"></div>`;
+    return `<div class="a">${md(m.text)}</div>`;
+  }).join("")+(data.busy?`<div class="a" style="color:var(--muted)">Working…</div>`:"");
+  gallery();
+  if(atBottom)th.scrollTop=th.scrollHeight;
+}
+function gallery(){
+  const g=$("#gallery"); if(!g||!data.slots.length)return;
+  const S=data.slots, s=S[Math.min(sel,S.length)-1], url=f=>`/work/${data.id}/${f}`;
+  const right=s.status==="generating"||s.status==="queued"?`<div class="ph">${s.status==="queued"?"Waiting…":"Generating image "+s.n+"…"}</div>`
+    :s.status==="failed"?`<div class="ph"><span class="err">Image ${s.n} didn't generate.<br>${esc(s.error||"")}</span></div>`
+    :`<img src="${url(s.file)}?v=${s.v}" alt="New image ${s.n}">`;
+  const ready=s.status==="ready", approved=S.filter(x=>x.approved).length;
+  g.innerHTML=`<a class="dl" href="/api/job/${data.id}/zip">⤓ Download the image set</a>
+   <div class="gal"><div>
+    <div class="pair"><div><span>Original ${s.n}</span><img src="${url("current/"+s.current.split("/").pop())}" alt=""></div>
+     <div><span>New ${s.n}${s.message?" · "+esc(s.message):""}</span>${right}</div></div>
+    <div class="btns">
+     <button data-a="approve" class="${s.approved?"on":""}" ${ready?"":"disabled"}>${s.approved?"✓ Approved":"Approve"}</button>
+     <button data-a="change" ${ready?"":"disabled"}>Request Changes</button>
+     <button data-a="regenerate" ${(ready||s.status==="failed")&&!data.busy?"":"disabled"}>Regenerate</button>
+     <span style="margin-left:auto;color:var(--muted);align-self:center">${approved} of ${S.length} approved</span>
+     <button data-a="drive" ${S.some(x=>x.file)&&!data.busy?"":"disabled"}>Save to Drive</button>
+    </div></div>
+    <div class="thumbs">${S.map(x=>`<button data-n="${x.n}" class="${x.n===s.n?"on":""}" title="Image ${x.n}"><img src="${x.file?url(x.file)+"?v="+x.v:url("current/"+x.current.split("/").pop())}" alt="">${x.approved?'<i class="ok">✓</i>':x.status==="failed"?'<i class="bad">!</i>':x.status==="generating"?'<i class="gen">…</i>':""}</button>`).join("")}</div></div>`;
+  g.querySelectorAll(".thumbs button").forEach(b=>b.onclick=()=>{sel=+b.dataset.n;gallery()});
+  g.querySelectorAll("[data-a]").forEach(b=>b.onclick=async()=>{
+    const a=b.dataset.a;
+    if(a==="change"){$("#t").value=`Image ${s.n}: `;$("#t").focus();sync();return}
+    if(a==="drive"){return send("save to drive")}
+    const r=await fetch(`/api/job/${data.id}/slot/${s.n}/${a}`,{method:"POST"});
+    if(!r.ok){alertMsg((await r.json()).error||"That didn't work.");return}
+    poll();
+  });
+}
+function alertMsg(t){const d=document.createElement("div");d.className="a err";d.textContent=t;col.appendChild(d);th.scrollTop=th.scrollHeight}
+async function poll(){
+  clearTimeout(timer); if(!JOB)return;
+  try{const r=await fetch(`/api/job/${JOB}`); if(r.ok){data=await r.json();render()}}catch(e){}
+  if(data&&(data.busy||data.slots.some(s=>s.status==="generating")))timer=setTimeout(poll,1500);
+}
+async function send(text){
+  const fd=new FormData(); fd.append("text",text); fd.append("job_id",JOB||""); fd.append("user",user()); fd.append("selected",sel);
+  files.forEach(f=>fd.append("files",f));
+  const r=await fetch("/api/send",{method:"POST",body:fd}); const j=await r.json().catch(()=>({error:"The server didn't answer. Is the app running?"}));
+  if(!r.ok){alertMsg(j.error);return}
+  if(j.job_id!==JOB){JOB=j.job_id;sel=1;history.replaceState(null,"","#"+JOB)}
+  files=[];$("#files").textContent="";poll();
+}
+const t=$("#t"),go=$("#go");
+function sync(){go.disabled=!t.value.trim();t.style.height="auto";t.style.height=Math.min(t.scrollHeight,160)+"px"}
+t.oninput=sync;
+t.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#f").requestSubmit()}};
+$("#f").onsubmit=e=>{e.preventDefault();const v=t.value.trim();if(!v)return;t.value="";sync();send(v)};
+$("#plus").onclick=()=>$("#pick").click();
+$("#pick").onchange=()=>{files=[...$("#pick").files];$("#files").textContent=files.length?`📎 ${files.length} image(s) attached, in this order: ${files.map(f=>f.name).join(", ")}`:""};
+$("#new").onclick=e=>{e.preventDefault();JOB=null;data=null;history.replaceState(null,"","#");empty()};
+$("#hist").onclick=async()=>{
+  JOB=null;data=null;const rows=await (await fetch("/api/jobs")).json();
+  col.innerHTML=`<h3>History</h3><table><tr><th>SKU</th><th>ASIN</th><th>Brand</th><th>By</th><th>When</th><th>Status</th></tr>${rows.map(r=>`<tr data-id="${r.id}"><td>${esc(r.sku||"")}</td><td>${esc(r.asin)}</td><td>${esc(r.brand||"")}</td><td>${esc(r.user)}</td><td>${new Date(r.created*1000).toLocaleString()}</td><td>${r.drive_url?`<a href="${r.drive_url}" target="_blank">${esc(r.status)}</a>`:esc(r.status)}</td></tr>`).join("")||'<tr><td colspan="6">Nothing yet.</td></tr>'}</table>`;
+  col.querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=e=>{if(e.target.tagName==="A")return;JOB=tr.dataset.id;history.replaceState(null,"","#"+JOB);poll()});
+};
+(async()=>{
+  try{const h=await (await fetch("/api/health")).json();
+    $("#rules").textContent=`Rules: codex @ ${h.rules}`;
+    const miss=[!h.anthropic_key&&"ANTHROPIC_API_KEY",!h.openai_key&&"OPENAI_API_KEY",!h.drive&&"GDRIVE_SERVICE_ACCOUNT_JSON (only for Save to Drive)"].filter(Boolean);
+    if(h.dry_run){$("#warn").hidden=false;$("#warn").textContent="Test mode is on (STUDIO_DRY_RUN=1): no real images are made."}
+    else if(miss.length){$("#warn").hidden=false;$("#warn").textContent="Missing in Replit Secrets: "+miss.join(", ")}
+  }catch(e){}
+  JOB=location.hash.slice(1)||null; JOB?poll():empty();
+})();
+</script>
+</body>
+</html>

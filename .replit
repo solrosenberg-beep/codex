@@ -1,0 +1,10 @@
+run = "pip install -q -r image-studio/requirements.txt && python image-studio/app.py"
+modules = ["python-3.12"]
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[deployment]
+run = ["sh", "-c", "pip install -q -r image-studio/requirements.txt && python image-studio/app.py"]
+deploymentTarget = "vm"
