@@ -10,9 +10,13 @@ Before generating or editing ANY image, post this line in chat, filled in from t
 
     Brand: <brand from the listing title/brand field>  Kit: brand-kits/<brand>/BRAND.md  Colors: <every HEX from its Colors table>  Fonts: <headline/body>
 
-If you cannot fill that line, you have not read the kit, so stop and read it. Every panel, headline, number and accent uses only those HEX codes. Red is a Pyle color; it never goes on SereneLife, Hurtle, NutriChef or Squatz. Teal is SereneLife; it never goes on Pyle.
+If you cannot fill that line, you have not read the kit, so stop and read it. Every panel, headline, number and accent you ADD uses only those HEX codes. Red is a Pyle color; it never goes on a SereneLife, Hurtle, NutriChef or Squatz panel or headline. Teal is SereneLife; it never goes on a Pyle panel.
 
-After each image: `python .codex/skills/amazon-listing-image-rebuild/scripts/brand_check.py <brand> <file>`. FAIL means regenerate that slot with the brand HEX codes in the prompt. Never show the user an image that failed. If the user asks to match the "old" or "original" listing style, keep the layout they point to but still use the brand kit colors and fonts, unless they say in words to drop the brand kit.
+## STOP RULE 2: the product keeps its real colors (non-negotiable)
+
+The brand kit governs what you add (panels, text, callouts, logo, backgrounds). It never governs the product. If the real treadmill has red trim and a red safety key, every image shows red trim and a red safety key. Never recolor, hide, darken, or "neutralize" any part of the product to satisfy the brand palette. A product shown in the wrong color is a misrepresentation; Amazon suppresses it and buyers return it. `brand_check.py` is given the reference product photo so product colors are ignored; only added graphics are judged.
+
+After each image: `python .codex/skills/amazon-listing-image-rebuild/scripts/brand_check.py <brand> <file> --reference work/<ASIN>/current/01.jpg`. FAIL means regenerate that slot with the brand HEX codes in the prompt. Never show the user an image that failed. If the user asks to match the "old" or "original" listing style, keep the layout they point to but still use the brand kit colors and fonts, unless they say in words to drop the brand kit.
 
 ## Getting the listing
 

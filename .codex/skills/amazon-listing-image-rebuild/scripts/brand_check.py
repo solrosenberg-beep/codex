@@ -2,8 +2,13 @@
 """Brand color gate for generated listing images.
 
 Usage:
-    python brand_check.py <brand> <image> [<image> ...]
-    python brand_check.py serenelife work/B0HJ3R1ZQD/new/*.png
+    python brand_check.py <brand> <image> [<image> ...] [--reference <product photo>]
+    python brand_check.py serenelife work/B0HJ3R1ZQD/new/*.png --reference work/B0HJ3R1ZQD/current/01.jpg
+
+--reference: the real product photo. Any color that appears on the product itself
+(red trim, orange buttons, a blue display) is ignored, because the product must keep
+its real colors. Only the colors you ADDED (panels, text, callouts) are judged.
+Always pass it when you have the current main image.
 
 Reads the HEX codes from brand-kits/<brand>/BRAND.md, then looks at every
 colorful (saturated) pixel in each image. Product photos are mostly neutral
@@ -58,7 +63,24 @@ def dist(a, b):
     return sum((x - y) ** 2 for x, y in zip(a, b)) ** 0.5
 
 
-def check(path, pal):
+def reference_colors(path):
+    """Colorful pixel buckets present on the real product; these are never off-brand."""
+    img = Image.open(path).convert("RGB")
+    img.thumbnail((300, 300))
+    raw = img.tobytes()
+    buckets = {}
+    total = 0
+    for i in range(0, len(raw), 3):
+        p = tuple(raw[i:i + 3])
+        if is_colorful(p):
+            total += 1
+            key = tuple((x // 32) * 32 + 16 for x in p)
+            buckets[key] = buckets.get(key, 0) + 1
+    # keep buckets that are more than a speck on the reference
+    return {k for k, n in buckets.items() if total and n / total >= 0.01}
+
+
+def check(path, pal, ref=frozenset()):
     img = Image.open(path).convert("RGB")
     img.thumbnail((300, 300))
     raw = img.tobytes()
@@ -69,7 +91,8 @@ def check(path, pal):
     off = {}
     on = 0
     for p in colorful:
-        if min(dist(p, c) for c in pal) <= MATCH_DIST:
+        key = tuple((x // 32) * 32 + 16 for x in p)
+        if key in ref or min(dist(p, c) for c in pal) <= MATCH_DIST:
             on += 1
         else:
             key = tuple((x // 32) * 32 + 16 for x in p)
@@ -86,12 +109,20 @@ def main():
     if len(sys.argv) < 3:
         print(__doc__)
         sys.exit(2)
-    brand, files = sys.argv[1], sys.argv[2:]
+    args = sys.argv[1:]
+    ref = frozenset()
+    if "--reference" in args:
+        i = args.index("--reference")
+        ref = frozenset(reference_colors(args[i + 1]))
+        del args[i:i + 2]
+    brand, files = args[0], args[1:]
     kit, pal, hexes = palette(brand)
     print(f"Brand: {brand}  Kit: {kit.relative_to(REPO)}  Palette: {' '.join('#' + h for h in hexes)}")
+    if ref:
+        print(f"Reference product colors ignored: {len(ref)} buckets")
     failed = 0
     for f in files:
-        ok, share, top = check(f, pal)
+        ok, share, top = check(f, pal, ref)
         verdict = "PASS" if ok else "FAIL"
         extra = "" if ok else "  off-brand: " + ", ".join(f"{h} ({p}%)" for h, p in top)
         print(f"{verdict}  {Path(f).name}  on-brand {round(share * 100)}%{extra}")
