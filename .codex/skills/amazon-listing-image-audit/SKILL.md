@@ -43,7 +43,7 @@ Score each item pass/fail. Read `references/rules.md` section "Hero image" and `
 2. If the parent has multiple colors, is a color swatch or color strip visible? (Buyer who dislikes the shown color scrolls past without ever knowing a second color exists.)
 3. Is any text callout large enough to read on a phone thumbnail? (If you cannot read it, delete it. "9 modes" in a tiny label is wasted.)
 4. If the item ships in a brown box, is the brown box behind the product carrying the value prop and swatches? (Do not fake retail packaging; just enhance the brown box. Packaging behind the product is the lowest-suppression-risk way to add text.)
-5. Does the image match the real product and the real spec? (The swing said 900 lb in the hero and 700 lb deeper in the stack. That kills conversion after the click.)
+5. Does the image show the real product, unchanged? Same shape, proportions, color, controls, ports, cord, and scale as the real item; flag any exaggeration, added feature, redesign, or size inflation. And does it match the real spec? (The swing said 900 lb in the hero and 700 lb deeper in the stack. That kills conversion after the click.)
 6. Does the thumbnail aspect ratio match the full image? (A slim thumbnail that opens to a wide image creates doubt.)
 7. Is the parentage clean? Flag any child that is actually a different product, or two identical children with different names (black vs "black legacy") that only differ in cost test. Amazon's bot is breaking these up anyway. Also flag two listings of the same product whose images show different shapes; one set is wrong.
 8. Are the counts on the hero? Bags, wipes, cable feet, modes, colors, capacity. Rank them by what decides the purchase and check the biggest is on the hero (session 2, rule 4).
@@ -65,6 +65,7 @@ For every image in the stack ask: **what does this image SAY?** If the answer is
 - Dimensions must answer "why do I care": will it fit under my cabinet, in my kitchen, in my car. Show it in that spot.
 - Translate specs into buyer language. "58 mm ETPU ball" means nothing in the US. "Tennis-ball size, soft, safe for teeth" does. "USB-C" means "uses the charger you already own". "Rechargeable" means "3 to 4 hours of park play, no cord".
 - Us vs them and before/after are the strongest formats for commoditized claims (non-stick, temperature control, weight capacity).
+- The product is shown as it is. Flag any image where the product looks bigger, sleeker, or more featured than the real one, or sits at the wrong scale in the scene. The setting can be designed; the product cannot be changed.
 - Every scene is different. Flag any two images that share the same setting, angle, background, model, or dish. A repetitive stack is a top-3 finding.
 - Flag any "not included" or "sold separately" disclaimer, asterisk, or fine print on an image. The fix is to remove the item from the picture, not to disclaim it, unless the user wants the disclaimer.
 - Break up monotony: do not run five fried-food images in a row. Alternate fried, healthy, fried.
