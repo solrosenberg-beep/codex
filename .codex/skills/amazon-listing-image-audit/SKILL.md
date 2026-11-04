@@ -17,7 +17,7 @@ One or more of:
 - Screenshots of the current hero and stack images
 - Sometimes the A+ content screenshots too
 
-If you only have an ASIN and a browser tool is available, open the listing and the search results page for the main keyword. If no browser is available, ask the user for screenshots of the hero, the full stack, and the top 6 search results for the main keyword. Do not guess what the images look like.
+If you have an ASIN, run `python ../amazon-listing-image-rebuild/scripts/fetch_listing.py <ASIN>` (relative to this skill). It pulls the title, bullets, specs, and every image in order into `work/<ASIN>/`, no browser needed. Open and look at every image before grading. If the script reports no internet, tell the user to turn on Agent internet access for the Codex environment and start a new task; only then ask for screenshots. Do not guess what the images look like.
 
 ## The workflow (always in this order)
 

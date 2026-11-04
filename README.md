@@ -30,7 +30,7 @@ Then restart Codex.
 | Skill | What it does |
 |---|---|
 | amazon-listing-image-audit | Grades an Amazon hero image and image stack against the Sound Around image masterclass rules and writes per-image fix briefs (review only, no image generation) |
-| amazon-listing-image-rebuild | Opens the listing, collects images and specs, reads the brand kit, writes a brief per slot, then generates each replacement image separately in the original slot order, composites the logo, and uploads the set to the Sound Around image drive as `<SKU>-CODEX` |
+| amazon-listing-image-rebuild | Pulls the listing straight from Amazon with a bundled script, reads the brand kit, writes a brief per slot, then generates each replacement image separately in the original slot order and composites the logo. Output lands in `work/<ASIN>/new/`. |
 
 ## Rulebook
 
@@ -48,12 +48,12 @@ Short, agent-readable brand rules plus logo files. The image audit skill reads t
 | Hurtle | `brand-kits/hurtle/BRAND.md` | Done |
 | Squatz | `brand-kits/squatz/BRAND.md` | Done |
 
-## One-time setup for Drive upload (web Codex)
+## One-time setup of the Codex environment (web Codex)
 
-The rebuild skill uploads finished images to the Sound Around image shared drive. It needs a Google service account:
+Open the `codex` project in web Codex, then **Environment** settings:
 
-1. Google Cloud Console: create a service account, download its JSON key.
-2. In Google Drive, share the image shared drive with the service account email as Content manager.
-3. In web Codex: the `codex` project, Environment, Secrets: add `GDRIVE_SERVICE_ACCOUNT_JSON` with the full JSON text.
+1. **Agent internet access: On.** Allow at least `amazon.com`, `www.amazon.com`, `m.media-amazon.com`. (Add `api.keepa.com` if you set a `KEEPA_API_KEY` secret.) Without this the skill cannot read the listing and will ask for screenshots.
+2. **Setup script** (runs with internet before each task): `pip install -r requirements.txt`
+3. Save, then start a **new** task. Old tasks keep the old environment.
 
-Until that is done the skill still produces the images locally and tells you the upload was skipped.
+Never pip install inside a task; the task sandbox retries forever. `AGENTS.md` tells Codex the same thing.

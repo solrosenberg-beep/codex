@@ -1,6 +1,6 @@
 ---
 name: amazon-listing-image-rebuild
-description: End-to-end rebuild of an Amazon listing's image stack for a Sound Around / Pyle USA brand. Opens the listing, collects the current images and specifications, reads the matching brand kit from this repo, writes one brief per slot, then generates each replacement image separately (one image per generation call) and saves it. Use this skill whenever the user gives an ASIN or Amazon URL and wants new images made, the stack redone, a hero regenerated, listing images rebuilt, "make me new images for this ASIN", "redo the images", "generate the stack", or wants the audit findings turned into finished image files. For a review-only grade with no image generation, use amazon-listing-image-audit instead.
+description: End-to-end rebuild of an Amazon listing's image stack for a Sound Around / Pyle USA brand. Pulls the listing (title, bullets, specs, every image in order) straight from Amazon with a bundled script, no browser needed, reads the matching brand kit from this repo, writes one brief per slot, then generates each replacement image separately (one image per generation call) and saves it. Use this skill whenever the user gives an ASIN or Amazon URL and wants new images made, the stack redone, a hero regenerated, listing images rebuilt, "make me new images for this ASIN", "redo the images", "generate the stack", or wants the audit findings turned into finished image files. For a review-only grade with no image generation, use amazon-listing-image-audit instead.
 ---
 
 # Amazon Listing Image Rebuild
@@ -9,16 +9,17 @@ Takes one ASIN from "current images" to "new image files on disk, one per slot, 
 
 ## Phase 1. Open the listing and collect everything
 
-1. Open `https://www.amazon.com/dp/<ASIN>` with the browser tool. If no browser tool is available, ask the user for: the listing URL, screenshots of every current image, the bullet points, and the tech spec table. Do not guess at any of it.
-2. Collect and save to `work/<ASIN>/listing.md`:
+1. Run `python scripts/fetch_listing.py <ASIN>` from this skill's folder. It pulls the title, brand, bullets, spec table, variations, and every listing image in order from amazon.com (or Keepa if `KEEPA_API_KEY` is set) into `work/<ASIN>/listing.md` and `work/<ASIN>/current/01.jpg, 02.jpg, ...`. It needs no packages; it uses only the standard library. Do not look for a "browser tool" and do not ask the user for screenshots first. If the script fails, it prints why. The usual cause is that the environment has no internet; tell the user in one line to turn on Agent internet access for the Codex environment (allow amazon.com and m.media-amazon.com) and start a new task. Only if that is impossible, ask the user to attach the images, bullets and spec table.
+   If a browser tool does exist, you may also open the page to read Q&A and reviews, but the script output is the source of record for images and specs.
+2. Check `work/<ASIN>/listing.md` has, and fill any gaps by fetching the page yourself with the same method the script uses:
    - Title, brand, price, review count and rating
    - Every bullet point, verbatim
    - The full product information / tech spec table (dimensions, weight, capacity, wattage, temperature range, battery, materials, what is in the box)
    - Variation info: colors, sizes, child ASINs
    - The top 5 questions from the Q&A and the 3 most common complaints in 1 to 3 star reviews (these become image messages)
-3. Save every current listing image to `work/<ASIN>/current/01.jpg`, `02.jpg`, ... in the exact order they appear on the listing, left to right in the thumbnail strip. This numbering is the spine of the whole job: every new image you make replaces the current image with the same number, and the finished set is delivered in this same order. Note the hero's aspect ratio.
+3. The script already saved every current image to `work/<ASIN>/current/01.jpg`, `02.jpg`, ... in the exact order Amazon shows them. This numbering is the spine of the whole job: every new image you make replaces the current image with the same number, and the finished set is delivered in this same order. Open each one and look at it. Note the hero's aspect ratio.
    Also record the Sound Around SKU (the model number, e.g. PKDRM8, SLSWNG100). It is usually in the title, the "Item model number" spec row, or the user gives it. You need it for the upload folder name.
-4. Open the search results for the main keyword (take it from the first three words of the title or ask the user). Save a screenshot as `work/<ASIN>/serp.png` and note in `listing.md`: 1-by or 5-by grid, what the top 6 competitors show on their hero, and what none of them show.
+4. Fetch the search results for the main keyword (first three words of the title, or ask the user) from `https://www.amazon.com/s?k=<keyword>` the same way, pull the top 6 result image URLs and titles, and note in `listing.md`: 1-by or 5-by grid, what the top 6 competitors show on their hero, and what none of them show. If the search page is blocked, say so and move on; it is useful, not required.
 5. Write `work/<ASIN>/avatar.md`: who buys this (one specific person) and the pain that sent them searching. Check it against the Q&A and the 1 to 3 star reviews you collected. This person is the model in every lifestyle image and the pain is the subject of at least one before/after slot. See `../amazon-listing-image-audit/references/rules-session-2.md` sections 1 to 3.
 6. Write the spec facts you will put on images into `work/<ASIN>/facts.md` as a short list. Only facts that appear on the listing or that the user confirms. A number that is not in `facts.md` does not go on an image. This is the guard against the 900 lb vs 700 lb problem.
 
@@ -103,28 +104,19 @@ Always in slot order: 1 (main), then 2, then 3, then 4 and up. Never start with 
 
 1. Build the prompt from the brief using the pattern in `references/brief_template.md` (section "Prompt pattern"). Put the brand hex codes and font names in the prompt. Ask for the text to be rendered in the image only when the model is reliable at text; otherwise generate the scene with a clear empty panel where the text goes and add the text in step 3.
 2. Generate at 2000 x 2000 (or the largest square the tool allows). Save as `work/<ASIN>/new/<SKU>-<NN>.png` where NN is the two-digit slot number matching the current image it replaces (example: `PKDRM8-02.png`). The number comes first in sort order so the folder lists in listing order. Put the message in `README.md`, not the filename.
-3. Composite with a script, not by hand: paste the brand logo from the brand kit at the position the kit specifies, add or correct the text in the brand fonts and hex colors, add the trust stamp if the brief calls for it. Use Pillow or an equivalent. Keep the script in `work/<ASIN>/compose.py` so a rerun is one command.
+3. Composite with a script, not by hand (Pillow is preinstalled by the environment Setup script; if it is missing, skip the composite, flag it, and do not pip install inside the task): paste the brand logo from the brand kit at the position the kit specifies, add or correct the text in the brand fonts and hex colors, add the trust stamp if the brief calls for it. Use Pillow or an equivalent. Keep the script in `work/<ASIN>/compose.py` so a rerun is one command.
 4. Check the result before moving on. This is the QA gate. First check the product against the reference photo: same shape, proportions, color, controls, ports, and scale, nothing added, nothing enlarged, nothing smoothed away. If the product differs from the reference, it fails and gets regenerated with the reference image and "match the product exactly" in the prompt. Then compare the new image to every slot already finished: if the scene, angle, background, or model repeats one, it fails and gets regenerated with a different scene. Also fail any image carrying a "not included" or "sold separately" line the user did not ask for. Then: no image reaches a human until it passes. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, the avatar matches `avatar.md`, the outlet and scale are believable, nothing looks AI-fake (hands, faces, text artifacts, impossible food). Score each check pass/fail in `work/<ASIN>/qa.md`. If a TypeSafe (Jev) image classifier or similar scoring tool is available in the environment, run it on the image with those same checks and record its score too; it costs almost nothing. If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
 5. Slot 1 (main) must pass every rule in "Amazon image rules" above. Save as `<SKU>-01.png`. If you also made a post-edited variant with added labels, save it as `<SKU>-01-labeled.png` and tell the user the labeled one is a split-test candidate with suppression risk, not a drop-in. The compliant one is always the one that goes in slot 1 of the upload.
 
-## Phase 5. Upload to the Sound Around image drive
-
-Every finished set goes to the shared image drive automatically, in a folder named `<SKU>-CODEX` (example: `PKDRM8-CODEX`) at the root of the drive, next to the existing SKU folders. Do this without being asked; it is part of "done."
-
-1. Run `python scripts/upload_to_drive.py --sku <SKU> --folder work/<ASIN>/new`. It creates the folder if missing, reuses it if it exists, and uploads the files in numbered order. Thumbnails (`*.thumb.png`) are skipped.
-2. If the script says there are no credentials, do not stop silently and do not skip the upload. Tell the user in one line: "Upload needs the Google Drive service account secret `GDRIVE_SERVICE_ACCOUNT_JSON` set in this Codex environment; see the top of `scripts/upload_to_drive.py`." Then still deliver the local folder.
-3. If a Google Drive tool or connector is available in this environment, you may use it instead of the script: create folder `<SKU>-CODEX` under drive root `0AJnODehJPHg5Uk9PVA`, upload the files in numbered order.
-4. Put the Drive folder link in `README.md` and in your final message.
-
 ## Deliver
 
-Write `work/<ASIN>/README.md` with: the slot list in order (file, what it replaces, message, source fact), what was flagged for a designer, the exact facts used, the recommended reorder if any, the split-test recommendation, and the Drive folder link. Then give the user the Drive link, the local folder path, and the list of files in order. Show thumbnails inline if the environment can display images.
+Write `work/<ASIN>/README.md` with: the slot list in order (file, what it replaces, message, source fact), what was flagged for a designer, the exact facts used, the recommended reorder if any, and the split-test recommendation. Then give the user the local folder path and the list of files in order, and show the images inline if the environment can. Show thumbnails inline if the environment can display images.
 
 Do not say the stack is done if any slot is flagged. Say which ones are done and which need a designer.
 
 ## What this skill does not do
 
-- It does not upload to Vendor Central or Seller Central. The user uploads from the Drive folder.
+- It does not upload anywhere. The user downloads the `work/<ASIN>/new/` files and uploads them to Vendor Central.
 - It does not reorder the stack. It replaces slot for slot and only recommends a reorder in writing.
 - It does not break Amazon's image rules for a better-looking image. Compliance beats creativity, every time.
 - It does not alter, improve, enlarge, or add to the product. The product is shown as it ships; only the setting is designed.
