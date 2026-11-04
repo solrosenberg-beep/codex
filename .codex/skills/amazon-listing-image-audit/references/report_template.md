@@ -23,6 +23,7 @@ Do the current images speak to that person? [yes / no, and who they speak to ins
 ## Hero image scorecard
 | Check | Pass / Fail | What is wrong | Fix |
 |---|---|---|---|
+| Amazon-compliant (white, product only, 85%, no added text) | | | |
 | Shows the ONE value prop | | | |
 | Color swatch if multi-color | | | |
 | Text readable at thumbnail size | | | |
@@ -32,15 +33,15 @@ Do the current images speak to that person? [yes / no, and who they speak to ins
 | Parentage is clean | | | |
 
 ## Image stack, slot by slot
-| Slot | What it says now | Mobile readable? | Realistic? | Verdict (Keep / Enlarge / Rewrite / Replace / Delete) | New message |
-|---|---|---|---|---|---|
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
-| 6 | | | | | |
-| 7 | | | | | |
-| 8 | | | | | |
+| Slot | What it says now | Mobile readable? | Realistic? | Amazon rules OK? | Verdict (Keep / Enlarge / Rewrite / Replace / Delete) | New message |
+|---|---|---|---|---|---|---|
+| 2 (key) | | | | | | |
+| 3 (key) | | | | | | |
+| 4 | | | | | | |
+| 5 | | | | | | |
+| 6 | | | | | | |
+| 7 | | | | | | |
+| 8 | | | | | | |
 
 Images in A+ that belong in the stack: [list, or "none"]
 Claims that conflict between hero, stack and A+: [list, or "none"]

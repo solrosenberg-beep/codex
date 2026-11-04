@@ -38,6 +38,7 @@ Pick the single strongest differentiator vs the SERP. Usually it is one of: capa
 ### Step 4. Grade the hero image
 Score each item pass/fail. Read `references/rules.md` section "Hero image" and `references/rules-session-2.md` for the full detail.
 
+0. Is it Amazon-compliant? Pure white background, product only, 85% fill, no added text or logos or badges (text printed on the real product or packaging is fine), square, 1000 px or larger. A non-compliant main image is finding number one, above everything else, because it gets the listing suppressed.
 1. Can the buyer learn the ONE value prop from this image alone? (Treat it as the only image they will ever see.)
 2. If the parent has multiple colors, is a color swatch or color strip visible? (Buyer who dislikes the shown color scrolls past without ever knowing a second color exists.)
 3. Is any text callout large enough to read on a phone thumbnail? (If you cannot read it, delete it. "9 modes" in a tiny label is wasted.)
@@ -49,6 +50,8 @@ Score each item pass/fail. Read `references/rules.md` section "Hero image" and `
 9. Does the hero show the biggest realistic thing it fits (bagel, not toast)?
 
 ### Step 5. Grade the image stack, one image at a time
+Images 1, 2, and 3 are the key images: most mobile buyers never swipe past 3. Grade those three hardest and put their fixes at the top of the Top 3 list. Also check every stack image for Amazon rule breaks: no prohibited claims (best seller, free shipping, sale, prices), no competitor names or logos, no Amazon badges, no review quotes, no watermarks.
+
 For every image in the stack ask: **what does this image SAY?** If the answer is "nothing" or "the same thing as image 3", it is a wasted slot. Read `references/rules.md` section "Image stack" for the checklist. The hard rules:
 
 - Every image has one purpose, stated in large text. No duplicate messages (two "dual cook" images is one wasted slot).

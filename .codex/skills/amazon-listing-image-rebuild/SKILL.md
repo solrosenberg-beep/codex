@@ -49,17 +49,48 @@ Read `references/rules.md` and `references/rules-session-2.md` in the sibling sk
 
 Show the user `briefs.md` before generating. Ask them to confirm any fact flagged as uncertain. If the user is not available, proceed with only the facts that are on the listing and leave the uncertain ones out.
 
+## Amazon image rules (apply to every image, no exceptions)
+
+Follow Amazon's product image requirements. An image that breaks them gets the listing suppressed, which is worse than a weak image.
+
+Main image (slot 1):
+- Pure white background, RGB 255, 255, 255. No gradient, no off-white.
+- Only the product that is sold. No props, no accessories not in the box, no people, no mannequins.
+- Product fills 85% or more of the frame. Nothing cropped off the edges.
+- No text, logos, badges, watermarks, borders, or graphics added in editing. Text that is physically printed on the product or on its real packaging is allowed. That is why the brown-box and side-of-product techniques exist.
+- Realistic photo or render of the actual product in the actual color sold. Not a drawing.
+- Square, 2000 x 2000 preferred, minimum 1000 px on the longest side so zoom works. Same aspect ratio across the set.
+- No multiple views of the product combined into one image.
+- For apparel-style items: no mannequins, flat or on a model per Amazon category rules.
+
+Other images (slots 2 and up):
+- Text, graphics, lifestyle, infographics, people, and backgrounds are allowed. This is where every value prop, number, and brand panel lives.
+- Still no watermarks, no promotional claims Amazon prohibits (no "best seller", "free shipping", "#1", "sale", prices, discount codes), no competitor names or logos in us-vs-them (say "typical competitor" or "others"), no Amazon logos or badges, no customer review quotes, no claims that are not true or not in `facts.md`.
+- No offensive or disgusting content, no mixing uses that Amazon or buyers would reject.
+- Same square ratio and resolution as the main image.
+- JPEG or PNG, sRGB.
+
+If a brief asks for something that breaks a rule above, fix the brief, not the rule.
+
+## The first three images are the key images
+
+Buyers on mobile see the main image in search, then swipe. Most never get past image 3. So slots 1, 2, and 3 decide the sale and get the most work:
+- Slot 1 (main): clean Amazon-compliant product shot. The value prop rides on the real packaging or the side of the product if possible. This image gets the click.
+- Slot 2: the ONE value prop, biggest number, biggest text, product large. This image confirms the click was right.
+- Slot 3: the pain solved or the second strongest reason (before/after, us vs them, or "fits your space"). This image closes the doubt.
+Spend time in that order. Generate slot 1 first, then 2, then 3, check each one against the QA gate before moving on, and only then do 4 and up. If time or tries run out, a perfect 1 to 3 with flagged 4 to 8 is a better delivery than eight average images. Slots 4 and up still matter; they are where the remaining questions get answered, but they never get worked before 1 to 3 are right.
+
 ## Phase 4. Generate each image separately
 
 Generate one image per call. Never ask for a grid, a contact sheet, or "all eight images." One call, one slot, one file. Reasons: each image needs its own composition and its own checking, a multi-image request produces small unreadable panels, and a failed slot should not cost the other seven.
 
-For each slot, in order:
+Always in slot order: 1 (main), then 2, then 3, then 4 and up. Never start with an easy lifestyle shot and come back to the main image later. For each slot, in order:
 
 1. Build the prompt from the brief using the pattern in `references/brief_template.md` (section "Prompt pattern"). Put the brand hex codes and font names in the prompt. Ask for the text to be rendered in the image only when the model is reliable at text; otherwise generate the scene with a clear empty panel where the text goes and add the text in step 3.
 2. Generate at 2000 x 2000 (or the largest square the tool allows). Save as `work/<ASIN>/new/<SKU>-<NN>.png` where NN is the two-digit slot number matching the current image it replaces (example: `PKDRM8-02.png`). The number comes first in sort order so the folder lists in listing order. Put the message in `README.md`, not the filename.
 3. Composite with a script, not by hand: paste the brand logo from the brand kit at the position the kit specifies, add or correct the text in the brand fonts and hex colors, add the trust stamp if the brief calls for it. Use Pillow or an equivalent. Keep the script in `work/<ASIN>/compose.py` so a rerun is one command.
 4. Check the result before moving on. This is the QA gate: no image reaches a human until it passes. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, the avatar matches `avatar.md`, the outlet and scale are believable, nothing looks AI-fake (hands, faces, text artifacts, impossible food). Score each check pass/fail in `work/<ASIN>/qa.md`. If a TypeSafe (Jev) image classifier or similar scoring tool is available in the environment, run it on the image with those same checks and record its score too; it costs almost nothing. If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
-5. Hero only: also produce the Amazon-compliant version. Pure white background (RGB 255,255,255), product fills 85% or more of the frame, no logo overlay on the product itself, no text other than what is physically printed on the product or its box. Save as `<SKU>-01.png`. If you also made a post-edited variant with labels, save it as `<SKU>-01-labeled.png` and tell the user the labeled one is a split-test candidate with suppression risk, not a drop-in.
+5. Slot 1 (main) must pass every rule in "Amazon image rules" above. Save as `<SKU>-01.png`. If you also made a post-edited variant with added labels, save it as `<SKU>-01-labeled.png` and tell the user the labeled one is a split-test candidate with suppression risk, not a drop-in. The compliant one is always the one that goes in slot 1 of the upload.
 
 ## Phase 5. Upload to the Sound Around image drive
 
@@ -80,5 +111,6 @@ Do not say the stack is done if any slot is flagged. Say which ones are done and
 
 - It does not upload to Vendor Central or Seller Central. The user uploads from the Drive folder.
 - It does not reorder the stack. It replaces slot for slot and only recommends a reorder in writing.
+- It does not break Amazon's image rules for a better-looking image. Compliance beats creativity, every time.
 - It does not invent product capabilities. If it is not on the listing or confirmed by the user, it is not on an image.
 - It does not draw the logo with the image model. The logo is always composited from the brand kit file.
