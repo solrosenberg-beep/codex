@@ -17,7 +17,7 @@ One or more of:
 - Screenshots of the current hero and stack images
 - Sometimes the A+ content screenshots too
 
-If you have an ASIN, run `python ../amazon-listing-image-rebuild/scripts/fetch_listing.py <ASIN>` (relative to this skill). It pulls the title, bullets, specs, and every image in order into `work/<ASIN>/`, no browser needed. Open and look at every image before grading. If the script reports no internet, tell the user to turn on Agent internet access for the Codex environment and start a new task; only then ask for screenshots. Do not guess what the images look like.
+If you only have an ASIN and a browser tool is available, open the listing and the search results page for the main keyword. If no browser is available, ask the user for screenshots of the hero, the full stack, and the top 6 search results for the main keyword. Do not guess what the images look like.
 
 ## The workflow (always in this order)
 
@@ -27,47 +27,31 @@ Never critique a hero image in a vacuum. Search the main keyword and note:
 - What are the top 6 competitors showing? (lifestyle, packaging, text callouts, color swatches, people on the product, scale references)
 - What is NOBODY showing that we could show? That gap is the decommoditizer.
 
-### Step 2. Name the avatar and the pain
-Write two lines before anything else: who buys this (the specific person, not the category) and what pain sent them searching. A 330 lb toilet is bought by a heavy adult afraid it will collapse. A vacuum sealer is bought by a Costco shopper tired of throwing out food. A curb ramp is bought by someone whose bumper scrapes. If the current images speak to a different avatar (grandpa with a walker, a skinny model, a podcaster for a mic with no USB), that is finding number one. Read `references/rules-session-2.md` sections 1 to 3.
-
-### Step 3. Find the ONE value prop
+### Step 2. Find the ONE value prop
 Ask the buyer's question: what is the pain that brought them here, and why this solution instead of the obvious one? (Bucket towel warmer instead of wall mount: renter, no space. Air fryer: broke the old one, or wants to eat healthier. Saucer swing: 900 lb capacity means the whole family can pile on.)
 
 Pick the single strongest differentiator vs the SERP. Usually it is one of: capacity or size, weight limit, temperature or power range, number of modes, number of colors available, or a multi-use claim. That one thing goes on the hero.
 
-### Step 4. Grade the hero image
-Score each item pass/fail. Read `references/rules.md` section "Hero image" and `references/rules-session-2.md` for the full detail.
+### Step 3. Grade the hero image
+Score each item pass/fail. Read `references/rules.md` section "Hero image" for the full detail.
 
-0. Is it Amazon-compliant? Pure white background, product only, 85% fill, no added text or logos or badges (text printed on the real product or packaging is fine), square, 1000 px or larger. A non-compliant main image is finding number one, above everything else, because it gets the listing suppressed.
 1. Can the buyer learn the ONE value prop from this image alone? (Treat it as the only image they will ever see.)
 2. If the parent has multiple colors, is a color swatch or color strip visible? (Buyer who dislikes the shown color scrolls past without ever knowing a second color exists.)
 3. Is any text callout large enough to read on a phone thumbnail? (If you cannot read it, delete it. "9 modes" in a tiny label is wasted.)
 4. If the item ships in a brown box, is the brown box behind the product carrying the value prop and swatches? (Do not fake retail packaging; just enhance the brown box. Packaging behind the product is the lowest-suppression-risk way to add text.)
-5. Does the image show the real product, unchanged? Same shape, proportions, color, controls, ports, cord, and scale as the real item; flag any exaggeration, added feature, redesign, or size inflation. And does it match the real spec? (The swing said 900 lb in the hero and 700 lb deeper in the stack. That kills conversion after the click.)
+5. Does the image match the real product and the real spec? (The swing said 900 lb in the hero and 700 lb deeper in the stack. That kills conversion after the click.)
 6. Does the thumbnail aspect ratio match the full image? (A slim thumbnail that opens to a wide image creates doubt.)
-7. Is the parentage clean? Flag any child that is actually a different product, or two identical children with different names (black vs "black legacy") that only differ in cost test. Amazon's bot is breaking these up anyway. Also flag two listings of the same product whose images show different shapes; one set is wrong.
-8. Are the counts on the hero? Bags, wipes, cable feet, modes, colors, capacity. Rank them by what decides the purchase and check the biggest is on the hero (session 2, rule 4).
-9. Does the hero show the biggest realistic thing it fits (bagel, not toast)?
+7. Is the parentage clean? Flag any child that is actually a different product, or two identical children with different names (black vs "black legacy") that only differ in cost test. Amazon's bot is breaking these up anyway.
 
-### Step 5. Grade the image stack, one image at a time
-Images 1, 2, and 3 are the key images: most mobile buyers never swipe past 3. Grade those three hardest and put their fixes at the top of the Top 3 list. Also check every stack image for Amazon rule breaks: no prohibited claims (best seller, free shipping, sale, prices), no competitor names or logos, no Amazon badges, no review quotes, no watermarks.
-
+### Step 4. Grade the image stack, one image at a time
 For every image in the stack ask: **what does this image SAY?** If the answer is "nothing" or "the same thing as image 3", it is a wasted slot. Read `references/rules.md` section "Image stack" for the checklist. The hard rules:
 
 - Every image has one purpose, stated in large text. No duplicate messages (two "dual cook" images is one wasted slot).
-- The avatar is the model. Same body type and life situation in every lifestyle shot, matched to the buyer (big guy for a 330 lb capacity product).
-- The pain is shown. Before/after or problem/solution appears at least once when the pain is visual (bumper on curb, brown lettuce, burnt toast).
-- Realism checks from session 2: outlet and cord shown, scale believable (under a cabinet, not mid-island), shipped bag matches the photo bag, collapsed vs expanded labeled with arrows, no disgust mixing, no sealing grapes or chips, adjustable ranges anchored to an adult and a kid.
-- Controls translated to outcomes ("pick the toast color" beats "levels 1 to 6"), and the competitor's confusing version shown next to ours.
-- Secondary uses (stool, wine, walker) are last or cut. Uses the product cannot do (podcast with no USB) are gone.
 - Mobile first. Text and the product itself fill the frame. Small diagrams of how-to-use steps are the most common failure; they should be top-to-bottom full-size.
 - Realistic use. Food is not crammed to the brim. A whole chicken is not in an air fryer that cannot hold one. Nobody props two air fryers on a marble counter. A dishwasher-safe part is shown on the top rack; a hand-wash part is shown in the sink.
 - Dimensions must answer "why do I care": will it fit under my cabinet, in my kitchen, in my car. Show it in that spot.
 - Translate specs into buyer language. "58 mm ETPU ball" means nothing in the US. "Tennis-ball size, soft, safe for teeth" does. "USB-C" means "uses the charger you already own". "Rechargeable" means "3 to 4 hours of park play, no cord".
 - Us vs them and before/after are the strongest formats for commoditized claims (non-stick, temperature control, weight capacity).
-- The product is shown as it is. Flag any image where the product looks bigger, sleeker, or more featured than the real one, or sits at the wrong scale in the scene. The setting can be designed; the product cannot be changed.
-- Every scene is different. Flag any two images that share the same setting, angle, background, model, or dish. A repetitive stack is a top-3 finding.
-- Flag any "not included" or "sold separately" disclaimer, asterisk, or fine print on an image. The fix is to remove the item from the picture, not to disclaim it, unless the user wants the disclaimer.
 - Break up monotony: do not run five fried-food images in a row. Alternate fried, healthy, fried.
 - Avoid obvious AI: toy-looking food, plastic-looking kids, pizza that looks like a cartoon. Customers spot it and it kills trust.
 - Pets: use labs, golden retrievers, dalmatians. Never pit bulls or German shepherds (stigma). Use common-looking dogs.
@@ -75,12 +59,12 @@ For every image in the stack ask: **what does this image SAY?** If the answer is
 - If a great image is sitting in A+ (the "nice to know") and not in the stack (the "need to know"), move it up. Buyers may never scroll to A+.
 - A big value prop buried as the last image belongs near the top.
 
-### Step 6. Write the fix briefs
+### Step 5. Write the fix briefs
 Produce one brief per image, in slot order, using the exact template in `references/report_template.md`. Each brief is written so a designer or an image AI (Codex, ChatGPT image model) can execute it without asking a question: headline text, sub text, what the product is doing, setting, what to remove, and the brand lockup to use.
 
 When you do not know the real-world use cases for a spec range (what do I cook at 260F vs 430F), ask an AI for four concrete examples spread across the range, then turn that into one four-panel infographic brief. Do not invent product capabilities; confirm anything the product may not actually do (can it really bake a quiche?) with the user before putting it in a brief.
 
-### Step 7. Rollout plan (only if asked, or if the catalog has siblings)
+### Step 6. Rollout plan (only if asked, or if the catalog has siblings)
 If the product has 5+ siblings (20 air fryers, 10 pizza makers), write the rollout rule: what is locked identically across all siblings, and what adapts per unit (2 baskets becomes 3 baskets, 4.4 qt becomes 3 qt each with the new total). Fix one perfectly, then scale.
 
 ## Output format

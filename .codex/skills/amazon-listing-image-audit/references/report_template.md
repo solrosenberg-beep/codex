@@ -2,11 +2,6 @@
 
 Buyer / ESM: [name]   Main keyword: [keyword]   SERP shape: [1-by or 5-by]   Date: [date]
 
-## Avatar and pain
-Who buys this: [one specific person]
-The pain that sent them searching: [one sentence]
-Do the current images speak to that person? [yes / no, and who they speak to instead]
-
 ## Bottom line
 [Two or three sentences. What the one value prop is, whether the hero shows it, and the single biggest reason this listing is losing clicks or sales.]
 
@@ -23,7 +18,6 @@ Do the current images speak to that person? [yes / no, and who they speak to ins
 ## Hero image scorecard
 | Check | Pass / Fail | What is wrong | Fix |
 |---|---|---|---|
-| Amazon-compliant (white, product only, 85%, no added text) | | | |
 | Shows the ONE value prop | | | |
 | Color swatch if multi-color | | | |
 | Text readable at thumbnail size | | | |
@@ -33,15 +27,15 @@ Do the current images speak to that person? [yes / no, and who they speak to ins
 | Parentage is clean | | | |
 
 ## Image stack, slot by slot
-| Slot | What it says now | Mobile readable? | Realistic? | Amazon rules OK? | Verdict (Keep / Enlarge / Rewrite / Replace / Delete) | New message |
-|---|---|---|---|---|---|---|
-| 2 (key) | | | | | | |
-| 3 (key) | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
-| 6 | | | | | | |
-| 7 | | | | | | |
-| 8 | | | | | | |
+| Slot | What it says now | Mobile readable? | Realistic? | Verdict (Keep / Enlarge / Rewrite / Replace / Delete) | New message |
+|---|---|---|---|---|---|
+| 2 | | | | | |
+| 3 | | | | | |
+| 4 | | | | | |
+| 5 | | | | | |
+| 6 | | | | | |
+| 7 | | | | | |
+| 8 | | | | | |
 
 Images in A+ that belong in the stack: [list, or "none"]
 Claims that conflict between hero, stack and A+: [list, or "none"]

@@ -3,16 +3,13 @@
 ## Per-slot brief (fill one per image in briefs.md)
 
 ```
-### Slot <NN>: <message in 5 words or fewer>   (replaces current image <NN>, output file <SKU>-<NN>.png)
+### Slot <n>: <message in 5 words or fewer>
 - Source fact: <the line from facts.md this image is built on>
 - Headline (exact text, max 5 words):
 - Sub text (exact text, max 12 words):
 - Big number (if any):
-- Product reference: <path to the current main image or user photo; the product must match it exactly, no changes>
 - What the product is doing:
-- Setting: <room, surface, who is there, what food or scenario>  (must differ from every other slot: room, angle, background, model, dish)
-- Camera angle: <front / three-quarter / top-down / close-up / wide>
-- Disclaimers: none (never add "not included" or "sold separately" unless the user asked)
+- Setting: <room, surface, who is there, what food or scenario>
 - Realism notes: <quantities, what must NOT appear>
 - Must fill the frame: <the one element that is largest>
 - Brand panel: <which hex background, which hex text, per BRAND.md approved pairs>
@@ -22,25 +19,19 @@
 - Uncertain: <anything the user must confirm, or "none">
 ```
 
-## Scene list check
-
-Before generating, write one line per slot: `NN: <room> / <angle> / <background color> / <who> / <food or object>`. Read the list top to bottom. If any two lines share three or more parts, change one of them.
-
 ## Prompt pattern for the image model
 
 Keep the prompt concrete. Describe the scene like a photographer's shot list, then the graphic panel like a designer's spec. Example for a dual basket air fryer, slot 2:
 
 ```
 Square 2000x2000 product infographic for an Amazon listing.
-Product: match the attached reference photo exactly: same shape, proportions, color, dials, ports, and logo placement. Do not redesign, enlarge, or add anything to it.
-Scene: the air fryer from the reference, two drawers pulled halfway open, on a light wood kitchen counter, soft natural window light from the left, shallow depth of field, realistic. Left drawer holds a normal single serving of crispy fries. Right drawer holds four chicken wings. Nothing overflowing.
+Scene: a matte black dual-basket air fryer, two drawers pulled halfway open, on a light wood kitchen counter, soft natural window light from the left, shallow depth of field, realistic. Left drawer holds a normal single serving of crispy fries. Right drawer holds four chicken wings. Nothing overflowing.
 Graphic panel: a solid deep burgundy (#5C191D) band across the top 28% of the image. Inside it, large bold headline text in bright yellow (#FBEF56): "Two Baskets. One Meal." Below it, smaller white text: "4.4 qt + 4.4 qt = 8.8 qt total". The headline must be large enough to read when the image is shrunk to a 150 pixel thumbnail.
 Leave the bottom left corner clear for a logo.
 No other text, no watermarks, no extra logos, no people.
 ```
 
 Notes:
-- Always attach the product reference image and say "match it exactly." Design the scene, never the product.
 - Give the model one scene and one panel. Not two scenes.
 - Always state "realistic" and name the quantities.
 - Always leave a clear logo zone; the logo is pasted in afterwards from the brand kit file.
