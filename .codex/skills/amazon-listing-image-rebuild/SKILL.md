@@ -74,6 +74,19 @@ Other images (slots 2 and up):
 
 If a brief asks for something that breaks a rule above, fix the brief, not the rule.
 
+## The product is shown exactly as it is
+
+The product in every image must be the real product, as shipped, in the color sold. This is a hard rule and it comes before style.
+- Use the current main image (or a user-supplied product photo) as the reference for every generation. Pass it to the image model as the source image when the tool allows. The product's shape, proportions, buttons, dials, ports, handles, color, finish, and logo placement must match it.
+- Never exaggerate. No bigger basket, no extra drawer, no longer cord, no extra buttons, no sleeker redesign, no "cleaner" version. If the real product has a visible seam, a plain dial, or a short cord, the image shows a visible seam, a plain dial, and a short cord.
+- Never add features that are not on the product. No screen it does not have, no light that does not light, no accessory not in the box.
+- Never change the size relative to its surroundings. The product sits at true scale next to the counter, the cabinet, the hand, the plate.
+- Never fake a result the product cannot produce (a whole chicken in a small basket, a restaurant plating from a home toaster).
+- The setting is the only thing you design. Put the real product, unchanged, into the right room, at the right angle, with the right person and the right food. The scene sells; the product stays honest.
+- Dimension callouts use the listing's numbers and the drawn product matches those numbers.
+
+Why: a buyer who gets something different from the picture returns it and leaves a one-star review. Amazon also suppresses images that misrepresent the product. An honest product in a great scene beats a flattering product in any scene.
+
 ## The first three images are the key images
 
 Buyers on mobile see the main image in search, then swipe. Most never get past image 3. So slots 1, 2, and 3 decide the sale and get the most work:
@@ -91,7 +104,7 @@ Always in slot order: 1 (main), then 2, then 3, then 4 and up. Never start with 
 1. Build the prompt from the brief using the pattern in `references/brief_template.md` (section "Prompt pattern"). Put the brand hex codes and font names in the prompt. Ask for the text to be rendered in the image only when the model is reliable at text; otherwise generate the scene with a clear empty panel where the text goes and add the text in step 3.
 2. Generate at 2000 x 2000 (or the largest square the tool allows). Save as `work/<ASIN>/new/<SKU>-<NN>.png` where NN is the two-digit slot number matching the current image it replaces (example: `PKDRM8-02.png`). The number comes first in sort order so the folder lists in listing order. Put the message in `README.md`, not the filename.
 3. Composite with a script, not by hand: paste the brand logo from the brand kit at the position the kit specifies, add or correct the text in the brand fonts and hex colors, add the trust stamp if the brief calls for it. Use Pillow or an equivalent. Keep the script in `work/<ASIN>/compose.py` so a rerun is one command.
-4. Check the result before moving on. This is the QA gate. First compare the new image to every slot already finished: if the scene, angle, background, or model repeats one, it fails and gets regenerated with a different scene. Also fail any image carrying a "not included" or "sold separately" line the user did not ask for. Then: no image reaches a human until it passes. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, the avatar matches `avatar.md`, the outlet and scale are believable, nothing looks AI-fake (hands, faces, text artifacts, impossible food). Score each check pass/fail in `work/<ASIN>/qa.md`. If a TypeSafe (Jev) image classifier or similar scoring tool is available in the environment, run it on the image with those same checks and record its score too; it costs almost nothing. If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
+4. Check the result before moving on. This is the QA gate. First check the product against the reference photo: same shape, proportions, color, controls, ports, and scale, nothing added, nothing enlarged, nothing smoothed away. If the product differs from the reference, it fails and gets regenerated with the reference image and "match the product exactly" in the prompt. Then compare the new image to every slot already finished: if the scene, angle, background, or model repeats one, it fails and gets regenerated with a different scene. Also fail any image carrying a "not included" or "sold separately" line the user did not ask for. Then: no image reaches a human until it passes. Open the file. Confirm: the message reads at 150 px (downscale a copy to 150 px and look at it), every number matches `facts.md`, the colors are the brand hex codes, the logo is not warped, the avatar matches `avatar.md`, the outlet and scale are believable, nothing looks AI-fake (hands, faces, text artifacts, impossible food). Score each check pass/fail in `work/<ASIN>/qa.md`. If a TypeSafe (Jev) image classifier or similar scoring tool is available in the environment, run it on the image with those same checks and record its score too; it costs almost nothing. If any check fails, regenerate that one slot with the fix in the prompt. Up to 3 tries per slot, then flag it for a human designer and move on.
 5. Slot 1 (main) must pass every rule in "Amazon image rules" above. Save as `<SKU>-01.png`. If you also made a post-edited variant with added labels, save it as `<SKU>-01-labeled.png` and tell the user the labeled one is a split-test candidate with suppression risk, not a drop-in. The compliant one is always the one that goes in slot 1 of the upload.
 
 ## Phase 5. Upload to the Sound Around image drive
@@ -114,5 +127,6 @@ Do not say the stack is done if any slot is flagged. Say which ones are done and
 - It does not upload to Vendor Central or Seller Central. The user uploads from the Drive folder.
 - It does not reorder the stack. It replaces slot for slot and only recommends a reorder in writing.
 - It does not break Amazon's image rules for a better-looking image. Compliance beats creativity, every time.
+- It does not alter, improve, enlarge, or add to the product. The product is shown as it ships; only the setting is designed.
 - It does not invent product capabilities. If it is not on the listing or confirmed by the user, it is not on an image.
 - It does not draw the logo with the image model. The logo is always composited from the brand kit file.
