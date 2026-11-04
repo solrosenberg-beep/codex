@@ -9,7 +9,9 @@
 - Sub text (exact text, max 12 words):
 - Big number (if any):
 - What the product is doing:
-- Setting: <room, surface, who is there, what food or scenario>
+- Setting: <room, surface, who is there, what food or scenario>  (must differ from every other slot: room, angle, background, model, dish)
+- Camera angle: <front / three-quarter / top-down / close-up / wide>
+- Disclaimers: none (never add "not included" or "sold separately" unless the user asked)
 - Realism notes: <quantities, what must NOT appear>
 - Must fill the frame: <the one element that is largest>
 - Brand panel: <which hex background, which hex text, per BRAND.md approved pairs>
@@ -18,6 +20,10 @@
 - Trust stamp: yes / no
 - Uncertain: <anything the user must confirm, or "none">
 ```
+
+## Scene list check
+
+Before generating, write one line per slot: `NN: <room> / <angle> / <background color> / <who> / <food or object>`. Read the list top to bottom. If any two lines share three or more parts, change one of them.
 
 ## Prompt pattern for the image model
 

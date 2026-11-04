@@ -65,6 +65,8 @@ For every image in the stack ask: **what does this image SAY?** If the answer is
 - Dimensions must answer "why do I care": will it fit under my cabinet, in my kitchen, in my car. Show it in that spot.
 - Translate specs into buyer language. "58 mm ETPU ball" means nothing in the US. "Tennis-ball size, soft, safe for teeth" does. "USB-C" means "uses the charger you already own". "Rechargeable" means "3 to 4 hours of park play, no cord".
 - Us vs them and before/after are the strongest formats for commoditized claims (non-stick, temperature control, weight capacity).
+- Every scene is different. Flag any two images that share the same setting, angle, background, model, or dish. A repetitive stack is a top-3 finding.
+- Flag any "not included" or "sold separately" disclaimer, asterisk, or fine print on an image. The fix is to remove the item from the picture, not to disclaim it, unless the user wants the disclaimer.
 - Break up monotony: do not run five fried-food images in a row. Alternate fried, healthy, fried.
 - Avoid obvious AI: toy-looking food, plastic-looking kids, pizza that looks like a cartoon. Customers spot it and it kills trust.
 - Pets: use labs, golden retrievers, dalmatians. Never pit bulls or German shepherds (stigma). Use common-looking dogs.
